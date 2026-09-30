@@ -11,6 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 <style>
+  /* التنسيقات الأساسية */
   *{box-sizing:border-box;font-family:'Cairo',sans-serif;margin:0;padding:0;
     -webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;touch-action:manipulation}
   html,body{overflow-x:hidden;width:100%}
@@ -95,7 +96,6 @@
     font-family:'Cairo',sans-serif;display:inline-flex;align-items:center;gap:6px}
   .back-btn-sm svg{width:14px;height:14px;fill:currentColor}
 
-  /* شبكة الأقسام زي الصورة الثانية */
   .cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:1200px;margin:0 auto}
   .cat-tile{background:linear-gradient(155deg,rgba(6,26,16,.9),rgba(10,35,22,.9));
     border:1px solid rgba(0,220,130,.22);border-radius:16px;padding:18px 12px;cursor:pointer;
@@ -113,7 +113,6 @@
   .cat-tile .cat-name{color:#fff;font-size:14px;font-weight:800;text-align:center;letter-spacing:.3px}
   .cat-tile .ch-count{color:#00dc82;font-size:11px;font-weight:700}
 
-  /* شبكة القنوات داخل القسم */
   .ch-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:1200px;margin:0 auto}
   .ch-tile{background:linear-gradient(155deg,rgba(6,26,16,.9),rgba(10,35,22,.9));
     border:1px solid rgba(0,220,130,.22);border-radius:14px;padding:14px;cursor:pointer;
@@ -130,7 +129,6 @@
   .ch-tile.offline{opacity:.5}
   .ch-tile.offline .ch-name{color:#5a7a70}
 
-  /* حالة "لا توجد قنوات" */
   .empty-state{max-width:500px;margin:60px auto;text-align:center;padding:40px 20px;
     background:linear-gradient(155deg,rgba(6,26,16,.7),rgba(10,35,22,.7));
     border:1px solid rgba(0,220,130,.2);border-radius:20px}
@@ -142,7 +140,7 @@
     border-top:1px solid rgba(0,220,130,.15);color:#5a7a70;font-size:12px;font-weight:600}
   .main-footer a{color:#00dc82;text-decoration:none;font-weight:700;margin:0 4px}
 
-  /* المشغل */
+  /* تنسيقات المشغل الجديدة */
   #streamView{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column}
   #streamView.show{display:flex}
   .stream-player-wrap{flex:1;display:flex;justify-content:center;align-items:center;background:#000;
@@ -243,13 +241,11 @@
     </a>
   </div>
 
-  <!-- عرض الأقسام -->
   <div id="categoriesView">
     <div class="section-title" id="catTitle">الأقسام والقنوات</div>
     <div id="categoriesContainer"></div>
   </div>
 
-  <!-- عرض قنوات القسم -->
   <div id="channelsView" style="display:none">
     <div class="back-row">
       <button class="back-btn-sm" onclick="backToCategories()">
@@ -268,7 +264,6 @@
   </div>
 </div>
 
-<!-- المشغل -->
 <div id="streamView">
   <div class="stream-player-wrap">
     <div class="player-box" id="playerBox">
@@ -299,14 +294,26 @@
 <div class="toast" id="toast">رسالة</div>
 
 <script>
+  // ==========================================================
+  // 1. الإعدادات الأساسية
+  // ==========================================================
+  // هنا بنستخدم البروكسي عشان نتخطى مشكلة CORS
   const PROXY_BASE = 'https://alankaboot-proxy.kamlnot61.workers.dev';
-  const tokenToUrl = t => PROXY_BASE + '/s?t=' + encodeURIComponent(t);
+  
+  // دالة بتحول الرابط الأصلي لرابط البروكسي
+  function buildProxyUrl(originalUrl){
+    return PROXY_BASE + '/proxy?url=' + encodeURIComponent(originalUrl);
+  }
 
+  // منع القوائم والاختصارات
   document.addEventListener('contextmenu', e=>e.preventDefault());
   document.addEventListener('keydown', e=>{
     if((e.ctrlKey||e.metaKey) && ['u','U'].includes(e.key)) e.preventDefault();
   });
 
+  // ==========================================================
+  // 2. اتصال MQTT لاستقبال البيانات من لوحة التحكم
+  // ==========================================================
   const BROKER = 'wss://broker.emqx.io:8084/mqtt';
   const TOPIC_DATA = 'kwtspta_9f3a2b1c/data';
   const TOPIC_HB = 'kwtspta_9f3a2b1c/hb';
@@ -353,10 +360,12 @@
     }catch(e){}
   });
 
+  // ==========================================================
+  // 3. دوال العرض (Categories & Channels)
+  // ==========================================================
   function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
   function render(){
-    // If user is inside a category view, re-render that
     if(currentCategoryId){
       const cat = data.categories.find(c=>c.id===currentCategoryId);
       if(cat){ renderChannels(cat); return; }
@@ -434,18 +443,29 @@
     }</div>`;
   }
 
+  // ==========================================================
+  // 4. تشغيل الفيديو (الجزء الأهم)
+  // ==========================================================
   function openChannel(catId, chId){
     const cat = data.categories.find(c=>c.id===catId);
     if(!cat) return;
     const ch = (cat.channels||[]).find(c=>c.id===chId);
     if(!ch) return;
-    if(!ch.live || !ch.streamToken){ showToast('القناة غير متاحة الآن'); return; }
+    
+    // ✅ دلوقتي بنشغل أي قناة عندها رابط أصلي مباشرة
+    if(!ch.originalUrl){
+      showToast('الرابط غير متوفر حالياً');
+      return;
+    }
 
     currentChannel = { catId, chId, name: ch.name };
     isStreamViewOpen = true;
     streamView.classList.add('show');
     document.body.style.overflow = 'hidden';
-    playStream(tokenToUrl(ch.streamToken));
+    
+    // هنا بنستخدم الرابط الأصلي عن طريق البروكسي
+    playStream(buildProxyUrl(ch.originalUrl));
+    
     history.pushState({stream:true}, '');
     requestFs();
   }
@@ -495,11 +515,33 @@
     if(!url){ stopStream(); return; }
     placeholder.style.display = 'none';
     if(hls){ hls.destroy(); hls = null; }
+
     if(Hls.isSupported()){
-      hls = new Hls({ lowLatencyMode:true, enableWorker:true });
+      hls = new Hls({
+        lowLatencyMode:true,
+        enableWorker:true,
+        // ضبط مهلة الانتظار عشان مايفصلش
+        manifestLoadingTimeOut: 20000, 
+        manifestLoadingMaxRetry: 3,
+        levelLoadingTimeOut: 20000,
+        levelLoadingMaxRetry: 3,
+        fragLoadingTimeOut: 20000,
+        fragLoadingMaxRetry: 3
+      });
       hls.loadSource(url);
       hls.attachMedia(video);
-      hls.on(Hls.Events.MANIFEST_PARSED, ()=> video.play().catch(()=>{}));
+      
+      hls.on(Hls.Events.MANIFEST_PARSED, ()=> {
+        video.play().catch(()=>{
+          // لو المتصفح رفض التشغيل التلقائي، بنحاول تاني بصوت مكتوم
+          video.muted = true;
+          video.play().then(()=>{
+            // بعد ما يشتغل بنشيل الكتم
+            setTimeout(()=>{ video.muted = false; }, 300);
+          }).catch(()=>{});
+        });
+      });
+      
       hls.on(Hls.Events.ERROR, (e,d)=>{
         if(d.fatal){
           if(d.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
@@ -507,7 +549,11 @@
         }
       });
     } else if(video.canPlayType('application/vnd.apple.mpegurl')){
-      video.src = url; video.play().catch(()=>{});
+      video.src = url;
+      video.play().catch(()=>{
+        video.muted = true;
+        video.play().then(()=>{ setTimeout(()=>{ video.muted = false; }, 300); }).catch(()=>{});
+      });
     }
   }
 
@@ -518,6 +564,9 @@
     placeholder.innerHTML = '<svg viewBox="0 0 24 24" style="width:56px;height:56px;fill:#004d2b;opacity:.7"><path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5v2h8v-2h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 14H3V5h18v12z"/></svg><span>تم إيقاف البث</span>';
   }
 
+  // ==========================================================
+  // 5. أزرار التحكم (Play/Pause, Volume, Seek, Fullscreen)
+  // ==========================================================
   function togglePlay(){ video.paused ? video.play().catch(()=>{}) : video.pause(); }
   video.addEventListener('play', ()=>{ playIcon.innerHTML = '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>'; });
   video.addEventListener('pause', ()=>{ playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>'; });
@@ -565,6 +614,7 @@
   progressWrap.addEventListener('pointerup', e=>{ isDraggingSeek = false; try{ progressWrap.releasePointerCapture(e.pointerId); }catch(_){} });
   progressWrap.addEventListener('pointercancel', ()=>{ isDraggingSeek = false; });
 
+  // إخفاء وإظهار أزرار التحكم عند اللمس في أي مكان
   let controlsVisible = true;
   playerBox.addEventListener('click', e=>{
     if(customControls.contains(e.target)) return;
@@ -575,4 +625,4 @@
   });
 </script>
 </body>
-  </html>
+</html>
