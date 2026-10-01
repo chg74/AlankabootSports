@@ -28,10 +28,21 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
 .hdr h1 span{color:#dc1420}
 .hdr .logo{width:40px;height:40px;border-radius:50%;border:2px solid rgba(220,20,30,.4);padding:2px;background:#fff}
 
-.cats{display:flex;gap:8px;overflow-x:auto;padding-bottom:10px;margin-bottom:14px;scrollbar-width:none}
-.cats::-webkit-scrollbar{display:none}
-.cat{padding:9px 18px;background:#121216;border:1px solid rgba(255,255,255,.06);border-radius:30px;color:#888;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;font-family:'Cairo',sans-serif}
-.cat.active{background:linear-gradient(90deg,#8b0000,#dc1420);color:#fff;border-color:transparent}
+/* شاشة الأقسام */
+.cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
+.cat-card{background:#121216;border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:14px;text-align:center;cursor:pointer;transition:.3s}
+.cat-card:active{transform:scale(.97);border-color:#dc1420}
+.cat-card .img-box{width:100%;aspect-ratio:1;border-radius:12px;overflow:hidden;background:#fff;display:flex;align-items:center;justify-content:center;padding:6px;margin-bottom:10px}
+.cat-card .img-box img{width:100%;height:100%;object-fit:contain}
+.cat-card .nm{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cat-card .cnt{font-size:11px;color:#666;margin-top:4px}
+
+/* شاشة القنوات داخل القسم */
+.channels-view{display:none}
+.channels-view.show{display:block}
+.channels-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.channels-hdr .back-cat{background:#121216;border:1px solid rgba(220,20,30,.3);color:#dc1420;padding:8px 14px;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Cairo',sans-serif}
+.channels-hdr h2{font-size:18px;font-weight:900;color:#fff}
 
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:12px}
 .card{background:#121216;border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:12px;text-align:center;cursor:pointer;transition:.3s}
@@ -49,6 +60,7 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
 .nav-it.active{color:#dc1420}
 .nav-it svg{width:22px;height:22px;fill:currentColor}
 
+/* شاشة المشاهدة */
 #player{display:none;position:fixed;inset:0;background:#000;z-index:99999;flex-direction:column}
 #player.show{display:flex}
 .p-cont{flex:1;display:flex;justify-content:center;align-items:center;background:#000;position:relative;overflow:hidden}
@@ -57,23 +69,21 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
 .back{position:absolute;top:20px;left:20px;z-index:100;background:rgba(220,20,30,.9);color:#fff;border:none;padding:10px 18px;border-radius:10px;font-family:'Cairo',sans-serif;font-weight:700;font-size:13px;cursor:pointer}
 .logo-ov{position:absolute;top:20px;right:20px;z-index:100;width:60px;height:60px;border-radius:50%;overflow:hidden;border:2px solid rgba(220,20,30,.5);background:#fff;padding:3px}
 .logo-ov img{width:100%;height:100%;object-fit:contain}
-.ctrls{position:absolute;bottom:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:10px;padding:14px 18px;background:linear-gradient(transparent,rgba(0,0,0,.9));opacity:1;transition:.3s}
-.ctrls.hidden{opacity:0;pointer-events:none}
-.cbtn{background:rgba(220,20,30,.25);color:#fff;border:1px solid rgba(220,20,30,.5);width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0}
-.cbtn svg{width:20px;height:20px;fill:#fff}
-.bar{flex:1;height:5px;background:rgba(255,255,255,.2);border-radius:5px;cursor:pointer;position:relative}
-.bar .fill{height:100%;width:0;background:linear-gradient(90deg,#8b0000,#dc1420);border-radius:5px}
-.tm{color:#fff;font-size:11px;font-weight:600;min-width:70px;text-align:center}
+
+/* شاشة التحميل داخل المشغل */
+.loader-overlay{position:absolute;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:50}
+.loader-overlay .spinner{width:50px;height:50px;border:4px solid rgba(220,20,30,.2);border-top:4px solid #dc1420;border-radius:50%;animation:spin 1s linear infinite}
+.loader-overlay .txt{color:#aaa;font-size:14px;font-weight:600;margin-top:16px}
 
 @media(max-width:600px){
+  .cats-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+  .cat-card .img-box{aspect-ratio:1}
   .grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
   .card .box{width:60px;height:60px}
   .card .nm{font-size:11px}
   .hdr h1{font-size:18px}
   .logo-ov{width:50px;height:50px;top:10px;right:10px}
   .back{top:10px;left:10px;padding:7px 12px;font-size:12px}
-  .cbtn{width:38px;height:38px}
-  .cbtn svg{width:16px;height:16px}
 }
 </style>
 </head>
@@ -91,8 +101,19 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
     <h1>Alankaboot <span>Sport</span></h1>
     <img class="logo" src="https://marketplace.canva.com/Na9X8/MAHB7PNa9X8/1/tl/canva-spider-web-illustration-MAHB7PNa9X8.png">
   </div>
-  <div class="cats" id="cats"></div>
-  <div class="grid" id="grid"></div>
+  
+  <!-- شاشة الأقسام -->
+  <div id="catsView" class="cats-grid"></div>
+  
+  <!-- شاشة القنوات داخل القسم -->
+  <div id="chView" class="channels-view">
+    <div class="channels-hdr">
+      <button class="back-cat" onclick="showCats()">← الأقسام</button>
+      <h2 id="catTitleView"></h2>
+    </div>
+    <div class="grid" id="grid"></div>
+  </div>
+  
   <div class="nav">
     <div class="nav-it active"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>الرئيسية</span></div>
     <div class="nav-it"><svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg><span>الأفلام</span></div>
@@ -103,22 +124,20 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
 <div id="player">
   <div class="p-cont">
     <div class="p-wrap" id="pWrap">
-      <video id="video" playsinline webkit-playsinline controls></video>
+      <video id="video" playsinline webkit-playsinline></video>
       <button class="back" onclick="closeP()">← رجوع</button>
       <div class="logo-ov"><img id="pLogo" src=""></div>
-      <div class="ctrls" id="ctrls">
-        <button class="cbtn" onclick="toggleMute()"><svg id="vi" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg></button>
-        <button class="cbtn" onclick="toggleFs()"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>
+      <div class="loader-overlay" id="loaderOverlay">
+        <div class="spinner"></div>
+        <div class="txt">جاري التحميل...</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue }
-  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAUc2C9hG9VE7RECiW19QXjNZqVH96sFE",
@@ -133,26 +152,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-let DATA = { categories: {}, channels: {} };
-let currentCat = 'all';
+let DATA = { categories: {} };
+let currentCat = null;
 const $ = id => document.getElementById(id);
 
-function getCatList(){
-  return Object.entries(DATA.categories).map(([id, v]) => ({id, ...v}));
-}
-function getChList(){
-  return Object.entries(DATA.channels).map(([id, v]) => ({id, ...v}));
-}
-
-// تحميل البيانات من Firebase (مباشر)
-onValue(ref(db, '/'), (snap) => {
-  const val = snap.val();
-  DATA = {
-    categories: val && val.categories ? val.categories : {},
-    channels: val && val.channels ? val.channels : {}
-  };
-  renderCats();
-  renderGrid();
+onValue(ref(db, 'categories'), (snap) => {
+  DATA.categories = snap.val() || {};
+  renderCatsView();
+  if(currentCat) renderChView(currentCat);
 });
 
 setTimeout(()=>{
@@ -163,27 +170,50 @@ setTimeout(()=>{
   },700);
 },2200);
 
-function renderCats(){
-  const c = $('cats');
-  let h = `<div class="cat ${currentCat==='all'?'active':''}" onclick="pick('all')">الكل</div>`;
-  h += getCatList().map(cat => `<div class="cat ${currentCat===cat.id?'active':''}" onclick="pick('${cat.id}')">${cat.name}</div>`).join('');
-  c.innerHTML = h;
+// عرض الأقسام
+function renderCatsView(){
+  const c = $('catsView');
+  const list = Object.entries(DATA.categories).map(([id, v]) => ({id, ...v}));
+  if(!list.length){
+    c.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666;padding:40px">لا توجد أقسام</p>';
+    return;
+  }
+  c.innerHTML = list.map(cat => {
+    const count = cat.channels ? Object.keys(cat.channels).length : 0;
+    return `<div class="cat-card" onclick="openCat('${cat.id}')">
+      <div class="img-box"><img src="${cat.image || 'https://marketplace.canva.com/Na9X8/MAHB7PNa9X8/1/tl/canva-spider-web-illustration-MAHB7PNa9X8.png'}" onerror="this.src='https://marketplace.canva.com/Na9X8/MAHB7PNa9X8/1/tl/canva-spider-web-illustration-MAHB7PNa9X8.png'"></div>
+      <div class="nm">${cat.name}</div>
+      <div class="cnt">${count} قناة</div>
+    </div>`;
+  }).join('');
 }
 
-window.pick = function(id){
-  currentCat = id; renderCats(); renderGrid();
+// فتح قسم
+window.openCat = function(id){
+  currentCat = id;
+  $('catsView').style.display = 'none';
+  $('chView').classList.add('show');
+  $('catTitleView').textContent = DATA.categories[id].name;
+  renderChView(id);
 };
 
-function renderGrid(){
+// العودة للأقسام
+window.showCats = function(){
+  currentCat = null;
+  $('chView').classList.remove('show');
+  $('catsView').style.display = 'grid';
+};
+
+// عرض القنوات داخل القسم
+function renderChView(catId){
+  const cat = DATA.categories[catId];
   const g = $('grid');
-  let list = getChList();
-  if(currentCat !== 'all') list = list.filter(ch => ch.categoryId === currentCat);
-  if(!list.length){
+  if(!cat || !cat.channels || !Object.keys(cat.channels).length){
     g.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#666;padding:40px">لا توجد قنوات في هذا القسم</p>';
     return;
   }
-  g.innerHTML = list.map(ch => `
-    <div class="card" onclick="play('${ch.id}')">
+  g.innerHTML = Object.entries(cat.channels).map(([chId, ch]) => `
+    <div class="card" onclick="play('${catId}','${chId}')">
       <div class="box"><img src="${ch.logo||'https://marketplace.canva.com/Na9X8/MAHB7PNa9X8/1/tl/canva-spider-web-illustration-MAHB7PNa9X8.png'}" onerror="this.src='https://marketplace.canva.com/Na9X8/MAHB7PNa9X8/1/tl/canva-spider-web-illustration-MAHB7PNa9X8.png'"></div>
       <div class="nm">${ch.name}</div>
       <div class="st ${ch.status==='live'?'live':''}">${ch.status==='live'?'مباشر':'غير متاح'}</div>
@@ -192,35 +222,49 @@ function renderGrid(){
 
 let hls = null, mpeg = null;
 
-window.play = function(id){
-  const ch = DATA.channels[id];
+window.play = function(catId, chId){
+  const ch = DATA.categories[catId].channels[chId];
   if(!ch) return;
   if(ch.status !== 'live'){ alert('القناة غير متاحة'); return; }
+  
   $('pLogo').src = ch.logo || 'https://marketplace.canva.com/Na9X8/MAHB7PNa9X8/1/tl/canva-spider-web-illustration-MAHB7PNa9X8.png';
+  
+  // 1. إظهار المشغل مع شاشة التحميل
   $('player').classList.add('show');
   document.body.style.overflow = 'hidden';
+  $('loaderOverlay').style.display = 'flex';
+  
+  // 2. ⚡ الشاشة الكاملة فوراً (داخل نفس الضغطة)
+  const el = $('pWrap');
+  if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+  else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  
+  // 3. بدء تشغيل البث
   startStream(ch.url);
   speak();
 };
 
-// 🌟 هنا حل مشكلة الروابط (تجاوز Mixed Content + CORS)
+// 🚀 حل مشكلة الروابط: بروكسي allorigins.win
 function startStream(url){
   const v = $('video');
   if(hls){ hls.destroy(); hls=null; }
   if(mpeg){ mpeg.destroy(); mpeg=null; }
   v.removeAttribute('src'); v.load();
 
-  // تحويل الرابط http إلى وسيط https لتجاوز حظر المتصفح
+  // تحويل جميع الروابط إلى https عبر بروكسي allorigins
   let finalUrl = url;
   if(url.startsWith('http://')){
-    finalUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+    finalUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
   }
 
   if(finalUrl.includes('.m3u8')){
     if(Hls.isSupported()){
       hls = new Hls({ lowLatencyMode:true, enableWorker:true });
       hls.loadSource(finalUrl); hls.attachMedia(v);
-      hls.on(Hls.Events.MANIFEST_PARSED, () => v.play().catch(()=>{}));
+      hls.on(Hls.Events.MANIFEST_PARSED, () => {
+        $('loaderOverlay').style.display = 'none';
+        v.play().catch(()=>{});
+      });
       hls.on(Hls.Events.ERROR, (e, d) => {
         if(d.fatal){
           if(d.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
@@ -229,14 +273,23 @@ function startStream(url){
       });
     } else if(v.canPlayType('application/vnd.apple.mpegurl')){
       v.src = finalUrl; v.play().catch(()=>{});
+      $('loaderOverlay').style.display = 'none';
     }
   } else if(finalUrl.includes('.ts')){
     if(mpegts.getFeatureList().mseLivePlayback){
       mpeg = mpegts.createPlayer({ type:'mpegts', isLive:true, url: finalUrl });
-      mpeg.attachMediaElement(v); mpeg.load(); mpeg.play();
-    } else { v.src = finalUrl; v.play().catch(()=>{}); }
+      mpeg.attachMediaElement(v); 
+      mpeg.on(mpegts.Events.ERROR, () => { $('loaderOverlay').style.display = 'none'; });
+      mpeg.load(); 
+      mpeg.play();
+      setTimeout(()=>{ $('loaderOverlay').style.display = 'none'; }, 1500);
+    } else { 
+      v.src = finalUrl; v.play().catch(()=>{}); 
+      $('loaderOverlay').style.display = 'none';
+    }
   } else {
     v.src = finalUrl; v.play().catch(()=>{});
+    $('loaderOverlay').style.display = 'none';
   }
 }
 
@@ -251,25 +304,6 @@ window.closeP = function(){
     if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
     else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
   }
-};
-
-window.toggleFs = function(){
-  const el = $('pWrap');
-  if(document.fullscreenElement || document.webkitFullscreenElement){
-    if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
-    else if(document.webkitExitFullscreen) document.webkitExitFullscreen();
-  } else {
-    if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
-    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-  }
-};
-
-window.toggleMute = function(){
-  const v = $('video');
-  v.muted = !v.muted;
-  $('vi').innerHTML = v.muted
-    ? '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>'
-    : '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
 };
 
 function speak(){
