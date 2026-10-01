@@ -1,0 +1,30 @@
+// api/proxy.js
+export const config = { runtime: 'edge' };
+
+export default async function handler(req) {
+  const url = new URL(req.url).searchParams.get('url');
+  if (!url) return new Response('Missing url', { status: 400 });
+
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+        'Referer': new URL(url).origin,
+        'Origin': new URL(url).origin
+      }
+    });
+
+    const headers = new Headers(response.headers);
+    headers.set('Access-Control-Allow-Origin', '*');
+    headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    headers.set('Access-Control-Allow-Headers', '*');
+    headers.set('Cache-Control', 'no-cache');
+
+    return new Response(response.body, {
+      status: response.status,
+      headers: headers
+    });
+  } catch (e) {
+    return new Response('Proxy error: ' + e.message, { status: 500 });
+  }
+}
