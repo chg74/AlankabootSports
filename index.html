@@ -28,7 +28,6 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
 .hdr h1 span{color:#dc1420}
 .hdr .logo{width:40px;height:40px;border-radius:50%;border:2px solid rgba(220,20,30,.4);padding:2px;background:#fff}
 
-/* شاشة الأقسام */
 .cats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:14px}
 .cat-card{background:#121216;border:1px solid rgba(255,255,255,.05);border-radius:16px;padding:14px;text-align:center;cursor:pointer;transition:.3s}
 .cat-card:active{transform:scale(.97);border-color:#dc1420}
@@ -37,7 +36,6 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
 .cat-card .nm{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cat-card .cnt{font-size:11px;color:#666;margin-top:4px}
 
-/* شاشة القنوات داخل القسم */
 .channels-view{display:none}
 .channels-view.show{display:block}
 .channels-hdr{display:flex;align-items:center;gap:12px;margin-bottom:16px}
@@ -60,7 +58,6 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
 .nav-it.active{color:#dc1420}
 .nav-it svg{width:22px;height:22px;fill:currentColor}
 
-/* شاشة المشاهدة */
 #player{display:none;position:fixed;inset:0;background:#000;z-index:99999;flex-direction:column}
 #player.show{display:flex}
 .p-cont{flex:1;display:flex;justify-content:center;align-items:center;background:#000;position:relative;overflow:hidden}
@@ -70,14 +67,12 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
 .logo-ov{position:absolute;top:20px;right:20px;z-index:100;width:60px;height:60px;border-radius:50%;overflow:hidden;border:2px solid rgba(220,20,30,.5);background:#fff;padding:3px}
 .logo-ov img{width:100%;height:100%;object-fit:contain}
 
-/* شاشة التحميل داخل المشغل */
 .loader-overlay{position:absolute;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:50}
 .loader-overlay .spinner{width:50px;height:50px;border:4px solid rgba(220,20,30,.2);border-top:4px solid #dc1420;border-radius:50%;animation:spin 1s linear infinite}
 .loader-overlay .txt{color:#aaa;font-size:14px;font-weight:600;margin-top:16px}
 
 @media(max-width:600px){
   .cats-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
-  .cat-card .img-box{aspect-ratio:1}
   .grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px}
   .card .box{width:60px;height:60px}
   .card .nm{font-size:11px}
@@ -101,11 +96,7 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
     <h1>Alankaboot <span>Sport</span></h1>
     <img class="logo" src="https://marketplace.canva.com/Na9X8/MAHB7PNa9X8/1/tl/canva-spider-web-illustration-MAHB7PNa9X8.png">
   </div>
-  
-  <!-- شاشة الأقسام -->
   <div id="catsView" class="cats-grid"></div>
-  
-  <!-- شاشة القنوات داخل القسم -->
   <div id="chView" class="channels-view">
     <div class="channels-hdr">
       <button class="back-cat" onclick="showCats()">← الأقسام</button>
@@ -113,7 +104,6 @@ html,body{background:#08080a;color:#fff;overflow-x:hidden;width:100%}
     </div>
     <div class="grid" id="grid"></div>
   </div>
-  
   <div class="nav">
     <div class="nav-it active"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><span>الرئيسية</span></div>
     <div class="nav-it"><svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg><span>الأفلام</span></div>
@@ -156,6 +146,9 @@ let DATA = { categories: {} };
 let currentCat = null;
 const $ = id => document.getElementById(id);
 
+// 🎯 البروكسي الخاص بك على Vercel
+const PROXY = '/api/proxy?url=';
+
 onValue(ref(db, 'categories'), (snap) => {
   DATA.categories = snap.val() || {};
   renderCatsView();
@@ -170,7 +163,6 @@ setTimeout(()=>{
   },700);
 },2200);
 
-// عرض الأقسام
 function renderCatsView(){
   const c = $('catsView');
   const list = Object.entries(DATA.categories).map(([id, v]) => ({id, ...v}));
@@ -188,7 +180,6 @@ function renderCatsView(){
   }).join('');
 }
 
-// فتح قسم
 window.openCat = function(id){
   currentCat = id;
   $('catsView').style.display = 'none';
@@ -197,14 +188,12 @@ window.openCat = function(id){
   renderChView(id);
 };
 
-// العودة للأقسام
 window.showCats = function(){
   currentCat = null;
   $('chView').classList.remove('show');
   $('catsView').style.display = 'grid';
 };
 
-// عرض القنوات داخل القسم
 function renderChView(catId){
   const cat = DATA.categories[catId];
   const g = $('grid');
@@ -228,67 +217,80 @@ window.play = function(catId, chId){
   if(ch.status !== 'live'){ alert('القناة غير متاحة'); return; }
   
   $('pLogo').src = ch.logo || 'https://marketplace.canva.com/Na9X8/MAHB7PNa9X8/1/tl/canva-spider-web-illustration-MAHB7PNa9X8.png';
-  
-  // 1. إظهار المشغل مع شاشة التحميل
   $('player').classList.add('show');
   document.body.style.overflow = 'hidden';
   $('loaderOverlay').style.display = 'flex';
   
-  // 2. ⚡ الشاشة الكاملة فوراً (داخل نفس الضغطة)
+  // ⚡ ملء الشاشة فوراً
   const el = $('pWrap');
   if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
   else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
   
-  // 3. بدء تشغيل البث
   startStream(ch.url);
   speak();
 };
 
-// 🚀 حل مشكلة الروابط: بروكسي allorigins.win
-function startStream(url){
+// 🚀 الدالة الرئيسية: تعالج m3u8 و ts عبر بروكسي Vercel
+async function startStream(url){
   const v = $('video');
   if(hls){ hls.destroy(); hls=null; }
   if(mpeg){ mpeg.destroy(); mpeg=null; }
   v.removeAttribute('src'); v.load();
 
-  // تحويل جميع الروابط إلى https عبر بروكسي allorigins
-  let finalUrl = url;
-  if(url.startsWith('http://')){
-    finalUrl = 'https://api.allorigins.win/raw?url=' + encodeURIComponent(url);
-  }
+  const isHttp = url.startsWith('http://');
 
-  if(finalUrl.includes('.m3u8')){
+  if(url.includes('.m3u8') || url.includes('m3u8')){
     if(Hls.isSupported()){
-      hls = new Hls({ lowLatencyMode:true, enableWorker:true });
-      hls.loadSource(finalUrl); hls.attachMedia(v);
+      hls = new Hls({
+        lowLatencyMode: true,
+        enableWorker: true,
+        // ✨ هنا السحر: كل طلب يمر عبر بروكسي Vercel
+        xhrSetup: function(xhr, reqUrl) {
+          if(reqUrl.startsWith('http://') || reqUrl.startsWith('https://')){
+            xhr.open('GET', PROXY + encodeURIComponent(reqUrl), true);
+          }
+        }
+      });
+      
+      // نمرر الرابط الأصلي أو عبر البروكسي
+      const loadUrl = isHttp ? (PROXY + encodeURIComponent(url)) : url;
+      hls.loadSource(loadUrl);
+      hls.attachMedia(v);
+      
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         $('loaderOverlay').style.display = 'none';
         v.play().catch(()=>{});
       });
+      
       hls.on(Hls.Events.ERROR, (e, d) => {
+        console.log('HLS Error:', d);
         if(d.fatal){
           if(d.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
           else if(d.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
         }
       });
     } else if(v.canPlayType('application/vnd.apple.mpegurl')){
-      v.src = finalUrl; v.play().catch(()=>{});
+      v.src = isHttp ? (PROXY + encodeURIComponent(url)) : url;
+      v.play().catch(()=>{});
       $('loaderOverlay').style.display = 'none';
     }
-  } else if(finalUrl.includes('.ts')){
+  } else if(url.includes('.ts')){
     if(mpegts.getFeatureList().mseLivePlayback){
+      const finalUrl = isHttp ? (PROXY + encodeURIComponent(url)) : url;
       mpeg = mpegts.createPlayer({ type:'mpegts', isLive:true, url: finalUrl });
-      mpeg.attachMediaElement(v); 
-      mpeg.on(mpegts.Events.ERROR, () => { $('loaderOverlay').style.display = 'none'; });
-      mpeg.load(); 
-      mpeg.play();
-      setTimeout(()=>{ $('loaderOverlay').style.display = 'none'; }, 1500);
-    } else { 
-      v.src = finalUrl; v.play().catch(()=>{}); 
+      mpeg.attachMediaElement(v);
+      mpeg.on(mpegts.Events.ERROR, (e) => { console.log('MPEGTS Error:', e); $('loaderOverlay').style.display = 'none'; });
+      mpeg.load();
+      mpeg.play().catch(()=>{});
+      setTimeout(()=>{ $('loaderOverlay').style.display = 'none'; }, 2000);
+    } else {
+      v.src = isHttp ? (PROXY + encodeURIComponent(url)) : url;
+      v.play().catch(()=>{});
       $('loaderOverlay').style.display = 'none';
     }
   } else {
-    v.src = finalUrl; v.play().catch(()=>{});
+    v.src = isHttp ? (PROXY + encodeURIComponent(url)) : url;
+    v.play().catch(()=>{});
     $('loaderOverlay').style.display = 'none';
   }
 }
@@ -324,4 +326,4 @@ if('speechSynthesis' in window){
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeP(); });
 </script>
 </body>
-    </html>
+</html>
