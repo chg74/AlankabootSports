@@ -5,119 +5,424 @@
 
 <meta charset="UTF-8">
 
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-<title>Alankaboot Sport</title>
+<title>Alankaboot Sport | البث المباشر</title>
 
 <link
-  href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap"
-  rel="stylesheet">
+href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap"
+rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
 
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
+
 <style>
+
+/* =====================================================
+   RESET
+===================================================== */
 
 *{
   box-sizing:border-box;
   margin:0;
   padding:0;
-  font-family:Cairo,sans-serif;
+  font-family:'Cairo',sans-serif;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  -webkit-user-select:none;
+}
+
+html,
+body{
+  width:100%;
+  min-height:100%;
+  background:#080304;
+  color:#fff;
+  overflow-x:hidden;
 }
 
 body{
+  position:relative;
+}
+
+
+/* =====================================================
+   BACKGROUND
+===================================================== */
+
+.bg-layer{
+  position:fixed;
+  inset:0;
+  z-index:-3;
+
   background:
     radial-gradient(
-      circle at top,
-      #30070b,
-      #080304 55%
-    );
-
-  color:#fff;
-  min-height:100vh;
-  padding:16px;
-}
-
-.container{
-  max-width:1200px;
-  margin:auto;
-}
-
-.header{
-  background:
+      circle at 20% 20%,
+      rgba(220,20,30,.22),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 80% 30%,
+      rgba(140,8,18,.18),
+      transparent 45%
+    ),
     linear-gradient(
-      145deg,
-      #240609,
-      #100304
+      135deg,
+      #080304,
+      #1a0507 50%,
+      #080304
     );
+}
 
-  border:1px solid #5c1016;
+.bg-orbs{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  overflow:hidden;
+}
 
-  border-radius:18px;
+.orb{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(70px);
+  opacity:.45;
+}
 
-  padding:18px;
+.orb1{
+  width:400px;
+  height:400px;
+  top:-100px;
+  left:-100px;
+  background:rgba(220,20,30,.6);
+}
+
+.orb2{
+  width:500px;
+  height:500px;
+  bottom:-150px;
+  right:-150px;
+  background:rgba(139,0,0,.5);
+}
+
+
+/* =====================================================
+   SPLASH
+===================================================== */
+
+#splash{
+  position:fixed;
+  inset:0;
+  z-index:99999;
 
   display:flex;
-
+  flex-direction:column;
   align-items:center;
+  justify-content:center;
 
-  justify-content:space-between;
+  background:
+    radial-gradient(
+      circle at center,
+      #1e0507,
+      #080304 70%
+    );
 
+  transition:opacity .8s;
+}
+
+#splash.hide{
+  opacity:0;
+  pointer-events:none;
+}
+
+.loader{
+  position:relative;
+  width:120px;
+  height:120px;
+  margin-bottom:22px;
+}
+
+.loader svg{
+  width:100%;
+  height:100%;
+  animation:rot 1.8s linear infinite;
+}
+
+.loader circle{
+  fill:none;
+  stroke:#dc1420;
+  stroke-width:3;
+  stroke-linecap:round;
+  stroke-dasharray:90 200;
+}
+
+@keyframes rot{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+.logo-circle{
+  position:absolute;
+  inset:22px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  overflow:hidden;
+
+  border-radius:50%;
+  background:#0d0405;
+}
+
+.logo-circle img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.brand-name{
+  font-size:28px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.welcome-text{
+  font-size:18px;
+  font-weight:800;
   margin-bottom:20px;
 }
 
-.brand{
+.loading-text{
+  color:#b89fa1;
+  font-size:13px;
+  margin-bottom:14px;
+}
+
+.loading-bar{
+  width:240px;
+  max-width:80%;
+  height:3px;
+  background:rgba(220,20,30,.15);
+  border-radius:3px;
+  overflow:hidden;
+}
+
+.loading-bar .fill{
+  width:100%;
+  height:100%;
+  background:
+    linear-gradient(
+      90deg,
+      #8b0000,
+      #dc1420,
+      #ff4757
+    );
+}
+
+
+/* =====================================================
+   APP
+===================================================== */
+
+#app{
+  display:none;
+  min-height:100vh;
+  padding:20px 16px;
+}
+
+#app.show{
+  display:block;
+}
+
+.main-header,
+.support-banner,
+.section-title,
+.content,
+.main-footer{
+  width:100%;
+  max-width:1200px;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.main-header{
+  margin-bottom:20px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:12px;
+
+  padding:14px 20px;
+
+  background:
+    linear-gradient(
+      155deg,
+      rgba(24,5,7,.9),
+      rgba(35,10,14,.9)
+    );
+
+  border:1px solid rgba(220,20,30,.25);
+  border-radius:16px;
+}
+
+.header-brand{
   display:flex;
   align-items:center;
   gap:12px;
 }
 
-.brand img{
-  width:48px;
-  height:48px;
-  border-radius:50%;
+.logo-sm{
+  width:46px;
+  height:46px;
+
+  padding:5px;
+
   object-fit:contain;
-  background:#050202;
+
+  border-radius:50%;
+
+  background:#0c0304;
+
+  border:1px solid rgba(220,20,30,.4);
 }
 
-.brand strong{
-  font-size:18px;
+.header-brand .name{
+  font-size:17px;
+  font-weight:900;
 }
 
-.brand small{
-  display:block;
-  color:#a88;
+.header-brand .sub{
+  color:#b89fa1;
   font-size:11px;
 }
 
-.telegram{
-  text-decoration:none;
+.header-tg{
   color:#fff;
-  background:#0088cc;
-  padding:9px 14px;
-  border-radius:10px;
-  font-size:12px;
-  font-weight:800;
+  text-decoration:none;
+
+  padding:9px 16px;
+
+  border-radius:12px;
+
+  font-size:13px;
+  font-weight:700;
+
+  background:
+    linear-gradient(
+      135deg,
+      #0088cc,
+      #00a3e0
+    );
 }
 
 
-/* =========================
-   TITLE
-========================= */
+/* =====================================================
+   SUPPORT
+===================================================== */
 
-.page-title{
-  font-size:17px;
+.support-banner{
+  margin-bottom:20px;
+  padding:18px 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(220,20,30,.12),
+      rgba(139,0,0,.08)
+    );
+
+  border:1px solid rgba(220,20,30,.35);
+  border-radius:16px;
+}
+
+.support-banner .title{
+  font-size:16px;
   font-weight:900;
+  margin-bottom:10px;
+}
+
+.support-banner .body{
+  color:#c9a5a7;
+  font-size:13px;
+  line-height:1.85;
   margin-bottom:14px;
 }
 
+.support-btn{
+  display:inline-flex;
 
-/* =========================
+  color:#fff;
+  text-decoration:none;
+
+  padding:10px 22px;
+
+  border-radius:12px;
+
+  font-size:13px;
+  font-weight:800;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8b0000,
+      #dc1420
+    );
+}
+
+
+/* =====================================================
+   TITLE
+===================================================== */
+
+.section-title{
+  margin-bottom:14px;
+
+  font-size:16px;
+  font-weight:900;
+}
+
+
+/* =====================================================
+   BACK
+===================================================== */
+
+.back-btn-page{
+  display:none;
+
+  margin-bottom:14px;
+
+  padding:9px 15px;
+
+  color:#fff;
+
+  background:#180406;
+
+  border:1px solid rgba(220,20,30,.3);
+
+  border-radius:10px;
+
+  font-size:12px;
+  font-weight:800;
+
+  cursor:pointer;
+}
+
+
+/* =====================================================
    GRID
-========================= */
+===================================================== */
 
 .grid{
 
@@ -126,148 +431,137 @@ body{
   grid-template-columns:
     repeat(
       auto-fill,
-      minmax(220px,1fr)
+      minmax(240px,1fr)
     );
 
-  gap:15px;
+  gap:16px;
 
 }
 
 
-/* =========================
-   CATEGORY
-========================= */
+/* =====================================================
+   CATEGORY CARD
+===================================================== */
 
-.category{
+.category-card{
 
-  background:
-    linear-gradient(
-      145deg,
-      #220608,
-      #100304
-    );
+  position:relative;
 
-  border:
-    1px solid
-    #4c0c12;
-
-  border-radius:17px;
-
-  padding:15px;
+  padding:16px;
 
   cursor:pointer;
 
+  background:
+    linear-gradient(
+      155deg,
+      rgba(24,5,7,.9),
+      rgba(35,10,14,.9)
+    );
+
+  border:1px solid rgba(220,20,30,.22);
+
+  border-radius:16px;
+
+  box-shadow:
+    0 10px 32px rgba(0,0,0,.45);
+
   transition:.2s;
-
 }
 
-.category:hover{
-  transform:translateY(-3px);
-  border-color:#dc1420;
+.category-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(220,20,30,.5);
 }
 
-.category img{
-
+.category-image{
   width:100%;
   height:150px;
 
   object-fit:contain;
 
+  background:#090203;
+
   border-radius:12px;
 
-  background:#050202;
-
   margin-bottom:12px;
-
 }
 
-.category .name{
-  font-weight:900;
+.category-name{
   font-size:15px;
+  font-weight:900;
 }
 
-.category .count{
-  color:#927174;
+.category-count{
+  color:#9c777a;
   font-size:11px;
   margin-top:4px;
 }
 
 
-/* =========================
-   BACK
-========================= */
+/* =====================================================
+   CHANNEL CARD
+===================================================== */
 
-.back{
+.channel-card{
 
-  display:none;
-
-  margin-bottom:15px;
-
-  padding:10px 16px;
-
-  border:1px solid #5c1016;
-
-  background:#180406;
-
-  color:#fff;
-
-  border-radius:10px;
+  padding:16px;
 
   cursor:pointer;
-
-}
-
-
-/* =========================
-   CHANNEL
-========================= */
-
-.channel{
 
   background:
     linear-gradient(
-      145deg,
-      #220608,
-      #100304
+      155deg,
+      rgba(24,5,7,.9),
+      rgba(35,10,14,.9)
     );
 
-  border:
-    1px solid
-    #4c0c12;
+  border:1px solid rgba(220,20,30,.22);
 
   border-radius:16px;
 
-  padding:15px;
+  box-shadow:
+    0 10px 32px rgba(0,0,0,.45);
 
-  cursor:pointer;
-
+  transition:.2s;
 }
 
-.channel img{
+.channel-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(220,20,30,.5);
+}
 
+.channel-image{
   width:100%;
   height:120px;
 
   object-fit:contain;
 
+  background:#090203;
+
   border-radius:12px;
 
-  background:#050202;
-
-  margin-bottom:10px;
-
+  margin-bottom:12px;
 }
 
-.channel .name{
+.channel-name{
+  font-size:14px;
   font-weight:900;
-  margin-bottom:10px;
+  margin-bottom:12px;
 }
 
-.watch{
+.watch-btn{
+  width:100%;
+
+  padding:10px;
 
   text-align:center;
 
-  padding:10px;
+  color:#fff;
+
+  border-radius:10px;
+
+  font-size:12px;
+  font-weight:800;
 
   background:
     linear-gradient(
@@ -275,212 +569,573 @@ body{
       #8b0000,
       #dc1420
     );
-
-  border-radius:9px;
-
-  font-size:12px;
-
-  font-weight:900;
-
 }
 
 
-/* =========================
-   PLAYER
-========================= */
+/* =====================================================
+   EMPTY
+===================================================== */
 
-#player{
+.empty{
+  grid-column:1/-1;
 
+  text-align:center;
+
+  color:#8a5b5e;
+
+  padding:50px 20px;
+}
+
+
+/* =====================================================
+   STREAM VIEW
+===================================================== */
+
+#streamView{
   display:none;
 
   position:fixed;
-
   inset:0;
 
-  z-index:9999;
-
-  background:#000;
-
-  align-items:center;
-
-  justify-content:center;
-
-}
-
-#player.show{
-  display:flex;
-}
-
-.videoBox{
-
-  position:relative;
-
   width:100vw;
-  height:100vh;
+  height:100dvh;
+
+  z-index:100000;
 
   background:#000;
 
-  display:flex;
+  overflow:hidden;
 
-  align-items:center;
-  justify-content:center;
-
+  flex-direction:column;
 }
 
-video{
+#streamView.show{
+  display:flex;
+}
+
+.stream-player-wrap{
+  position:relative;
 
   width:100%;
   height:100%;
 
-  object-fit:contain;
-
-  background:#000;
-
-}
-
-.close{
-
-  position:absolute;
-
-  top:15px;
-  right:15px;
-
-  z-index:20;
-
-  background:
-    rgba(0,0,0,.7);
-
-  border:1px solid #555;
-
-  color:#fff;
-
-  border-radius:8px;
-
-  padding:8px 14px;
-
-  cursor:pointer;
-
-}
-
-.loading{
-
-  position:absolute;
-
-  inset:0;
+  flex:1;
 
   display:flex;
 
   align-items:center;
   justify-content:center;
 
-  flex-direction:column;
+  background:#000;
 
-  gap:12px;
+  overflow:hidden;
+}
+
+.player-box{
+  position:relative;
+
+  width:100vw;
+  height:100dvh;
 
   background:#000;
 
-  z-index:10;
+  display:flex;
 
+  align-items:center;
+  justify-content:center;
+
+  overflow:hidden;
 }
 
-.loading.hide{
+.video-aspect{
+  position:relative;
+
+  width:100%;
+  height:100%;
+
+  background:#000;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  overflow:hidden;
+}
+
+.video-aspect video{
+  display:block;
+
+  width:100%;
+  height:100%;
+
+  background:#000;
+
+  object-fit:contain;
+
+  outline:none;
+}
+
+
+/* =====================================================
+   BACK PLAYER
+===================================================== */
+
+.back-player{
+  position:absolute;
+
+  top:14px;
+  left:14px;
+
+  z-index:2000;
+
+  padding:6px 12px;
+
+  color:#fff;
+
+  border:1px solid rgba(255,255,255,.3);
+
+  border-radius:7px;
+
+  background:rgba(0,0,0,.55);
+
+  font-size:11px;
+  font-weight:700;
+
+  cursor:pointer;
+}
+
+
+/* =====================================================
+   CONTROLS
+===================================================== */
+
+.custom-controls{
+  position:absolute;
+
+  left:0;
+  right:0;
+  bottom:0;
+
+  z-index:1500;
+
+  display:flex;
+
+  align-items:center;
+
+  gap:8px;
+
+  padding:14px;
+
+  background:
+    linear-gradient(
+      transparent,
+      rgba(0,0,0,.85)
+    );
+
+  opacity:1;
+
+  transition:opacity .3s;
+}
+
+.custom-controls.hidden{
+  opacity:0;
+  pointer-events:none;
+}
+
+.ctrl-btn{
+  width:40px;
+  height:40px;
+
+  flex-shrink:0;
+
+  display:flex;
+
+  align-items:center;
+  justify-content:center;
+
+  color:#fff;
+
+  border:1px solid rgba(220,20,30,.4);
+
+  border-radius:50%;
+
+  background:rgba(220,20,30,.2);
+
+  cursor:pointer;
+}
+
+.ctrl-btn svg{
+  width:18px;
+  height:18px;
+  fill:currentColor;
+}
+
+.progress-wrap{
+  flex:1;
+
+  min-width:60px;
+
+  padding:10px 3px;
+
+  cursor:pointer;
+}
+
+.progress-bar{
+  width:100%;
+  height:4px;
+
+  overflow:hidden;
+
+  border-radius:4px;
+
+  background:rgba(255,255,255,.25);
+}
+
+.progress-fill{
+  width:0;
+  height:100%;
+
+  background:#dc1420;
+}
+
+.time-display{
+  color:#fff;
+
+  white-space:nowrap;
+
+  font-size:12px;
+}
+
+
+/* =====================================================
+   PLACEHOLDER
+===================================================== */
+
+.placeholder{
+  position:absolute;
+
+  inset:0;
+
+  z-index:100;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:center;
+  justify-content:center;
+
+  gap:12px;
+
+  color:#8c7072;
+
+  background:#000;
+}
+
+.placeholder.hidden{
   display:none;
 }
 
-.spinner{
-
+.loading-player{
   width:42px;
   height:42px;
 
-  border:3px solid #401015;
+  border:3px solid rgba(220,20,30,.2);
 
   border-top-color:#dc1420;
 
   border-radius:50%;
 
-  animation:spin .8s linear infinite;
-
+  animation:
+    spinPlayer .8s linear infinite;
 }
 
-@keyframes spin{
+@keyframes spinPlayer{
   to{
     transform:rotate(360deg);
   }
 }
 
 
-/* =========================
+/* =====================================================
+   TOAST
+===================================================== */
+
+.toast{
+  position:fixed;
+
+  left:50%;
+  bottom:30px;
+
+  z-index:999999;
+
+  transform:translateX(-50%);
+
+  padding:11px 24px;
+
+  color:#fff;
+
+  border-radius:26px;
+
+  background:#dc1420;
+
+  font-size:13px;
+  font-weight:700;
+
+  opacity:0;
+
+  pointer-events:none;
+
+  transition:.3s;
+}
+
+.toast.show{
+  opacity:1;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.main-footer{
+  margin-top:30px;
+
+  padding:20px;
+
+  color:#8a5b5e;
+
+  text-align:center;
+
+  font-size:12px;
+
+  border-top:
+    1px solid
+    rgba(220,20,30,.15);
+}
+
+.main-footer a{
+  color:#dc1420;
+  text-decoration:none;
+}
+
+
+/* =====================================================
    MOBILE
-========================= */
+===================================================== */
 
 @media(max-width:600px){
 
-  body{
-    padding:10px;
-  }
-
-  .header{
+  #app{
     padding:12px;
   }
 
-  .brand strong{
+  .main-header{
+    padding:12px;
+  }
+
+  .header-brand .name{
     font-size:14px;
   }
 
-  .telegram{
-    font-size:10px;
-    padding:7px 9px;
+  .header-tg{
+    padding:8px 10px;
+    font-size:11px;
+  }
+
+  .support-banner{
+    padding:15px;
   }
 
   .grid{
     grid-template-columns:
       repeat(2,1fr);
+
     gap:10px;
   }
 
-  .category{
+  .category-card,
+  .channel-card{
     padding:10px;
   }
 
-  .category img{
-    height:110px;
+  .category-image{
+    height:105px;
   }
 
-  .channel{
-    padding:10px;
+  .channel-image{
+    height:85px;
   }
 
-  .channel img{
-    height:90px;
+  .category-name,
+  .channel-name{
+    font-size:12px;
   }
 
+  .watch-btn{
+    font-size:10px;
+    padding:8px;
+  }
+
+  .custom-controls{
+    padding:8px;
+  }
+
+  .ctrl-btn{
+    width:35px;
+    height:35px;
+  }
+
+  .time-display{
+    font-size:10px;
+  }
+
+}
+
+
+/* =====================================================
+   LANDSCAPE
+===================================================== */
+
+@media(
+  max-width:900px
+) and (
+  orientation:landscape
+){
+
+  #streamView,
+  .player-box,
+  .video-aspect{
+    width:100vw;
+    height:100dvh;
+  }
+
+  .video-aspect video{
+    width:100vw;
+    height:100dvh;
+    object-fit:contain;
+  }
+
+}
+
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
+.player-box:fullscreen{
+  width:100vw !important;
+  height:100vh !important;
+  background:#000;
+}
+
+.player-box:-webkit-full-screen{
+  width:100vw !important;
+  height:100vh !important;
+  background:#000;
+}
+
+.player-box:fullscreen video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
+.player-box:-webkit-full-screen video{
+  width:100%;
+  height:100%;
+  object-fit:contain;
 }
 
 </style>
 
 </head>
 
+
 <body>
 
-<div class="container">
+
+<div class="bg-layer"></div>
+
+<div class="bg-orbs">
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+</div>
 
 
-  <div class="header">
+<!-- =====================================================
+     SPLASH
+===================================================== -->
 
-    <div class="brand">
+<div id="splash">
+
+  <div class="loader">
+
+    <svg viewBox="0 0 100 100">
+
+      <circle
+        cx="50"
+        cy="50"
+        r="45">
+      </circle>
+
+    </svg>
+
+    <div class="logo-circle">
 
       <img
+        src="https://i.postimg.cc/xT8rcsT1/file-000000008bb4820ebcd371e64fff0469.png"
+        alt="Alankaboot Sport">
+
+    </div>
+
+  </div>
+
+
+  <div class="brand-name">
+    Alankaboot Sport
+  </div>
+
+  <div class="welcome-text">
+    أهلاً وسهلاً بك
+  </div>
+
+  <div class="loading-text">
+    جاري التحميل...
+  </div>
+
+  <div class="loading-bar">
+    <div class="fill"></div>
+  </div>
+
+</div>
+
+
+<!-- =====================================================
+     APP
+===================================================== -->
+
+<div id="app">
+
+
+  <div class="main-header">
+
+    <div class="header-brand">
+
+      <img
+        class="logo-sm"
         src="https://i.postimg.cc/xT8rcsT1/file-000000008bb4820ebcd371e64fff0469.png">
 
       <div>
 
-        <strong>
+        <div class="name">
           Alankaboot Sport
-        </strong>
+        </div>
 
-        <small>
-          البث المباشر
-        </small>
+        <div class="sub">
+          البث المباشر للمباريات والقنوات
+        </div>
 
       </div>
 
@@ -488,92 +1143,248 @@ video{
 
 
     <a
-      class="telegram"
+      class="header-tg"
       href="https://t.me/alankabootsport"
-      target="_blank">
+      target="_blank"
+      rel="noopener">
 
-      تيليجرام
+      قناتنا على تيليجرام
 
     </a>
 
   </div>
 
 
-  <div
-    id="home">
+  <div class="support-banner">
 
-    <div class="page-title">
+    <div class="title">
+      ❤️ بدعمكم نستمر
+    </div>
+
+    <div class="body">
+      دعمك للقناة يساعدنا على الاستمرار وتقديم البث بشكل أفضل.
+    </div>
+
+    <a
+      class="support-btn"
+      href="https://t.me/boost/alankabootsport"
+      target="_blank"
+      rel="noopener">
+
+      ادعم القناة الآن
+
+    </a>
+
+  </div>
+
+
+  <!-- ==============================
+       HOME
+  =============================== -->
+
+  <div id="homePage">
+
+    <div class="section-title">
       📁 قوائم القنوات
     </div>
 
     <div
-      class="grid"
-      id="categories">
+      class="content">
+
+      <div
+        class="grid"
+        id="categoriesGrid">
+      </div>
+
     </div>
 
   </div>
 
 
+  <!-- ==============================
+       CHANNELS
+  =============================== -->
+
   <div
     id="channelsPage"
     style="display:none">
 
-    <button
-      class="back"
-      id="backButton"
-      onclick="goHome()">
+    <div class="content">
 
-      ← رجوع إلى القوائم
+      <button
+        class="back-btn-page"
+        id="backPageBtn"
+        onclick="goHome()">
 
-    </button>
+        ← رجوع إلى القوائم
 
-    <div
-      class="page-title"
-      id="categoryTitle">
+      </button>
+
+
+      <div
+        class="section-title"
+        id="channelsTitle">
+
+      </div>
+
+
+      <div
+        class="grid"
+        id="channelsGrid">
+
+      </div>
+
     </div>
 
-    <div
-      class="grid"
-      id="channels">
-    </div>
+  </div>
+
+
+  <div class="main-footer">
+
+    © 2026 Alankaboot Sport — جميع الحقوق محفوظة
+
+    <br><br>
+
+    <a
+      href="https://t.me/alankabootsport"
+      target="_blank">
+
+      قناتنا على تيليجرام
+
+    </a>
 
   </div>
 
 </div>
 
 
-<!-- PLAYER -->
+<!-- =====================================================
+     PLAYER
+===================================================== -->
 
-<div id="player">
-
-  <div class="videoBox">
-
-    <button
-      class="close"
-      onclick="closePlayer()">
-
-      ✕ إغلاق
-
-    </button>
+<div id="streamView">
 
 
-    <video
-      id="video"
-      playsinline
-      webkit-playsinline
-      controls
-      preload="auto">
-    </video>
+  <div class="stream-player-wrap">
 
 
     <div
-      class="loading"
-      id="loading">
+      class="player-box"
+      id="playerBox">
 
-      <div class="spinner"></div>
 
-      <div>
-        جاري تشغيل البث...
+      <div
+        class="video-aspect"
+        id="videoAspect">
+
+
+        <video
+          id="video"
+          playsinline
+          webkit-playsinline
+          preload="auto"
+          controlslist="nodownload noremoteplayback"
+          disablepictureinpicture>
+        </video>
+
+
+        <button
+          class="back-player"
+          onclick="closeStream()">
+
+          رجوع
+
+        </button>
+
+
+        <!-- =========================
+             CONTROLS
+        ========================== -->
+
+        <div
+          class="custom-controls"
+          id="customControls">
+
+
+          <button
+            class="ctrl-btn"
+            onclick="togglePlay()">
+
+            <svg
+              id="playIcon"
+              viewBox="0 0 24 24">
+
+              <path
+                d="M8 5v14l11-7z">
+              </path>
+
+            </svg>
+
+          </button>
+
+
+          <div
+            class="progress-wrap"
+            id="progressWrap">
+
+            <div class="progress-bar">
+
+              <div
+                class="progress-fill"
+                id="progressFill">
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <span
+            class="time-display"
+            id="timeDisplay">
+
+            🔴 مباشر
+
+          </span>
+
+
+          <button
+            class="ctrl-btn"
+            onclick="toggleMute()">
+
+            <svg
+              id="volIcon"
+              viewBox="0 0 24 24">
+
+              <path
+                d="M3 9v6h4l5 5V4L7 9H3z">
+              </path>
+
+            </svg>
+
+          </button>
+
+
+        </div>
+
+
+        <!-- =========================
+             PLACEHOLDER
+        ========================== -->
+
+        <div
+          class="placeholder"
+          id="playerPlaceholder">
+
+          <div class="loading-player"></div>
+
+          <span>
+            جاري تشغيل البث...
+          </span>
+
+        </div>
+
+
       </div>
 
     </div>
@@ -583,11 +1394,36 @@ video{
 </div>
 
 
+<div
+  class="toast"
+  id="toast">
+</div>
+
+
 <script>
 
-/* =========================================
+/* =====================================================
+   CONFIG
+===================================================== */
+
+const PROXY_BASE =
+  'https://alankaboot-proxy.kamlnot61.workers.dev';
+
+
+function tokenToUrl(token){
+
+  return (
+    PROXY_BASE +
+    '/s?t=' +
+    encodeURIComponent(token)
+  );
+
+}
+
+
+/* =====================================================
    MQTT
-========================================= */
+===================================================== */
 
 const BROKER =
   'wss://broker.emqx.io:8084/mqtt';
@@ -595,63 +1431,144 @@ const BROKER =
 const TOPIC_DATA =
   'kwtspta_9f3a2b1c/data';
 
+const TOPIC_CMD =
+  'kwtspta_9f3a2b1c/cmd';
 
-let db = {
-  categories:[]
-};
+const TOPIC_HB =
+  'kwtspta_9f3a2b1c/hb';
 
 
-let currentCategory =
-  null;
+/* =====================================================
+   ELEMENTS
+===================================================== */
 
+const splash =
+  document.getElementById('splash');
+
+const app =
+  document.getElementById('app');
+
+const homePage =
+  document.getElementById('homePage');
+
+const channelsPage =
+  document.getElementById('channelsPage');
+
+const categoriesGrid =
+  document.getElementById('categoriesGrid');
+
+const channelsGrid =
+  document.getElementById('channelsGrid');
+
+const channelsTitle =
+  document.getElementById('channelsTitle');
+
+const backPageBtn =
+  document.getElementById('backPageBtn');
+
+const streamView =
+  document.getElementById('streamView');
+
+const playerBox =
+  document.getElementById('playerBox');
+
+const video =
+  document.getElementById('video');
+
+const placeholder =
+  document.getElementById('playerPlaceholder');
+
+const customControls =
+  document.getElementById('customControls');
+
+const playIcon =
+  document.getElementById('playIcon');
+
+const volIcon =
+  document.getElementById('volIcon');
+
+const progressFill =
+  document.getElementById('progressFill');
+
+const progressWrap =
+  document.getElementById('progressWrap');
+
+const timeDisplay =
+  document.getElementById('timeDisplay');
+
+const toast =
+  document.getElementById('toast');
+
+
+/* =====================================================
+   VARIABLES
+===================================================== */
 
 let hls = null;
 
+let database = {
+  categories:[]
+};
 
-const categories =
-  document.getElementById(
-    'categories'
-  );
+let currentCategoryId = null;
 
-const channels =
-  document.getElementById(
-    'channels'
-  );
+let currentStreamUrl = '';
 
-const home =
-  document.getElementById(
-    'home'
-  );
+let isStreamViewOpen = false;
 
-const channelsPage =
-  document.getElementById(
-    'channelsPage'
-  );
+let controlsVisible = true;
 
-const categoryTitle =
-  document.getElementById(
-    'categoryTitle'
-  );
-
-const player =
-  document.getElementById(
-    'player'
-  );
-
-const video =
-  document.getElementById(
-    'video'
-  );
-
-const loading =
-  document.getElementById(
-    'loading'
-  );
+let isDraggingSeek = false;
 
 
-/* =========================================
-   CONNECT
-========================================= */
+/* =====================================================
+   TOAST
+===================================================== */
+
+function showToast(message){
+
+  toast.textContent =
+    message;
+
+  toast.classList.add('show');
+
+  setTimeout(()=>{
+    toast.classList.remove('show');
+  },2500);
+
+}
+
+
+/* =====================================================
+   SPLASH
+===================================================== */
+
+setTimeout(()=>{
+
+  splash.classList.add('hide');
+
+  setTimeout(()=>{
+
+    splash.style.display =
+      'none';
+
+    app.classList.add('show');
+
+  },800);
+
+},2800);
+
+
+/* =====================================================
+   MQTT
+===================================================== */
+
+const MY_ID =
+  'user_' +
+  Math.random()
+    .toString(36)
+    .slice(2,10);
+
 
 try{
 
@@ -659,12 +1576,7 @@ try{
     mqtt.connect(
       BROKER,
       {
-        clientId:
-          'user_' +
-          Math.random()
-          .toString(36)
-          .slice(2,10),
-
+        clientId:MY_ID,
         reconnectPeriod:3000
       }
     );
@@ -678,6 +1590,36 @@ try{
         TOPIC_DATA
       );
 
+
+      client.subscribe(
+        TOPIC_CMD
+      );
+
+
+      client.publish(
+        TOPIC_HB,
+        JSON.stringify({
+          id:MY_ID
+        })
+      );
+
+
+      setInterval(()=>{
+
+        try{
+
+          client.publish(
+            TOPIC_HB,
+            JSON.stringify({
+              id:MY_ID
+            })
+          );
+
+        }
+        catch(e){}
+
+      },5000);
+
     }
   );
 
@@ -685,12 +1627,6 @@ try{
   client.on(
     'message',
     (topic,msg)=>{
-
-      if(
-        topic !== TOPIC_DATA
-      )
-        return;
-
 
       try{
 
@@ -700,61 +1636,214 @@ try{
           );
 
 
+        /* =============================
+           DATABASE
+        ============================= */
+
         if(
-          data &&
-          Array.isArray(
-            data.categories
-          )
+          topic === TOPIC_DATA
         ){
 
-          db = data;
+          /*
+             الشكل المطلوب:
 
-          renderCategories();
+             {
+               categories:[
+                 {
+                   id,
+                   name,
+                   image,
+                   channels:[
+                     {
+                       id,
+                       name,
+                       image,
+                       url
+                     }
+                   ]
+                 }
+               ]
+             }
+          */
 
 
-          if(currentCategory){
+          if(
+            data &&
+            Array.isArray(
+              data.categories
+            )
+          ){
 
-            const c =
-              db.categories.find(
-                x =>
-                  x.id ===
-                  currentCategory
+            database =
+              data;
+
+            renderCategories();
+
+
+            /*
+              لو المستخدم داخل قائمة
+              نحدث القنوات تلقائيًا.
+            */
+
+            if(
+              currentCategoryId
+            ){
+
+              const category =
+                database.categories.find(
+                  c =>
+                    c.id ===
+                    currentCategoryId
+                );
+
+
+              if(category){
+
+                renderChannels(
+                  category
+                );
+
+              }
+
+            }
+
+          }
+
+        }
+
+
+        /* =============================
+           COMMAND
+        ============================= */
+
+        if(
+          topic === TOPIC_CMD &&
+          isStreamViewOpen
+        ){
+
+          /*
+            لو الأدمن أرسل تشغيل
+            لنفس القناة.
+          */
+
+          if(
+            data.action === 'play'
+          ){
+
+            let url = '';
+
+
+            if(data.token){
+
+              url =
+                tokenToUrl(
+                  data.token
+                );
+
+            }
+            else if(
+              data.streamUrl
+            ){
+
+              url =
+                data.streamUrl;
+
+            }
+            else if(
+              data.url
+            ){
+
+              url =
+                data.url;
+
+            }
+
+
+            if(url){
+
+              playStream(
+                url
               );
 
-            if(c)
-              renderChannels(c);
+            }
+
+          }
+
+
+          if(
+            data.action === 'stop'
+          ){
+
+            stopStream();
 
           }
 
         }
 
       }
-      catch(e){}
+      catch(error){}
 
     }
   );
 
 }
-catch(e){}
+catch(error){}
 
 
-/* =========================================
-   CATEGORIES
-========================================= */
+/* =====================================================
+   SAFE HTML
+===================================================== */
+
+function escapeHTML(value){
+
+  return String(
+    value ?? ''
+  )
+  .replace(/&/g,'&amp;')
+  .replace(/</g,'&lt;')
+  .replace(/>/g,'&gt;')
+  .replace(/"/g,'&quot;')
+  .replace(/'/g,'&#039;');
+
+}
+
+
+function safeUrl(url){
+
+  if(!url)
+    return '';
+
+  return String(url)
+    .replace(/"/g,'%22')
+    .replace(/</g,'%3C')
+    .replace(/>/g,'%3E');
+
+}
+
+
+/* =====================================================
+   RENDER CATEGORIES
+===================================================== */
 
 function renderCategories(){
 
-  if(!db.categories.length){
+  if(
+    !database.categories ||
+    !database.categories.length
+  ){
 
-    categories.innerHTML = `
-      <div style="
-        color:#927174;
-        grid-column:1/-1;
-        text-align:center;
-        padding:50px 10px;
-      ">
+    categoriesGrid.innerHTML = `
+
+      <div class="empty">
+
+        📺
+
+        <br><br>
+
         لا توجد قوائم قنوات حاليًا
+
       </div>
+
     `;
 
     return;
@@ -762,112 +1851,168 @@ function renderCategories(){
   }
 
 
-  categories.innerHTML =
-    db.categories.map(
-      c => `
+  categoriesGrid.innerHTML =
 
-      <div
-        class="category"
-        onclick="
-          openCategory(
-            '${escapeAttr(c.id)}'
-          )
-        ">
+    database.categories
+      .map((category,index)=>`
 
-        ${
-          c.image
-          ?
-          `<img
-            src="${escapeAttr(c.image)}"
-            onerror="
-              this.style.visibility='hidden'
-            ">`
-          :
-          `
-          <div style="
-            height:150px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            font-size:50px;
-            background:#050202;
-            border-radius:12px;
-          ">
-            📺
+        <div
+          class="category-card"
+          onclick="openCategory(${index})">
+
+
+          ${
+            category.image
+
+            ?
+
+            `
+            <img
+              class="category-image"
+              src="${safeUrl(
+                category.image
+              )}"
+              onerror="
+                this.style.visibility='hidden'
+              ">
+            `
+
+            :
+
+            `
+            <div
+              class="category-image"
+              style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:55px;
+              ">
+
+              📺
+
+            </div>
+            `
+
+          }
+
+
+          <div class="category-name">
+
+            ${escapeHTML(
+              category.name ||
+              'قائمة قنوات'
+            )}
+
           </div>
-          `
-        }
 
-        <div class="name">
-          ${escapeHTML(c.name)}
+
+          <div class="category-count">
+
+            ${
+              Array.isArray(
+                category.channels
+              )
+              ?
+              category.channels.length
+              :
+              0
+            }
+
+            قناة
+
+          </div>
+
+
         </div>
 
-        <div class="count">
-          ${c.channels.length} قناة
-        </div>
-
-      </div>
-
-    `
-    ).join('');
+      `)
+      .join('');
 
 }
 
 
-/* =========================================
+/* =====================================================
    OPEN CATEGORY
-========================================= */
+===================================================== */
 
-function openCategory(id){
+function openCategory(index){
 
-  const c =
-    db.categories.find(
-      x => x.id === id
+  const category =
+    database.categories[index];
+
+
+  if(!category)
+    return;
+
+
+  currentCategoryId =
+    category.id;
+
+
+  homePage.style.display =
+    'none';
+
+
+  channelsPage.style.display =
+    'block';
+
+
+  backPageBtn.style.display =
+    'inline-block';
+
+
+  channelsTitle.textContent =
+    '📺 ' +
+    (
+      category.name ||
+      'القنوات'
     );
 
 
-  if(!c)
-    return;
+  renderChannels(
+    category
+  );
 
 
-  currentCategory =
-    id;
-
-
-  home.style.display =
-    'none';
-
-
-  channelsPage.style.display =
-    'block';
-
-
-  categoryTitle.textContent =
-    '📺 ' + c.name;
-
-
-  renderChannels(c);
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
 
 }
 
 
-/* =========================================
-   CHANNELS
-========================================= */
+/* =====================================================
+   RENDER CHANNELS
+===================================================== */
 
-function renderChannels(c){
+function renderChannels(category){
 
-  if(!c.channels.length){
+  const list =
+    Array.isArray(
+      category.channels
+    )
+    ?
+    category.channels
+    :
+    [];
 
-    channels.innerHTML = `
-      <div style="
-        grid-column:1/-1;
-        text-align:center;
-        color:#927174;
-        padding:50px;
-      ">
-        لا توجد قنوات داخل هذه القائمة
+
+  if(!list.length){
+
+    channelsGrid.innerHTML = `
+
+      <div class="empty">
+
+        📺
+
+        <br><br>
+
+        لا توجد قنوات داخل هذه القائمة حاليًا
+
       </div>
+
     `;
 
     return;
@@ -875,112 +2020,315 @@ function renderChannels(c){
   }
 
 
-  channels.innerHTML =
-    c.channels.map(
-      ch => `
+  channelsGrid.innerHTML =
 
-      <div
-        class="channel"
-        onclick="
-          playChannel(
-            '${escapeAttr(ch.url)}'
-          )
-        ">
+    list
+      .map((channel,index)=>`
 
-        ${
-          ch.image
-          ?
-          `<img
-            src="${escapeAttr(ch.image)}"
-            onerror="
-              this.style.visibility='hidden'
-            ">`
-          :
-          `
-          <div style="
-            height:120px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            background:#050202;
-            border-radius:12px;
-            font-size:45px;
+        <div
+          class="channel-card"
+          onclick="
+            openChannel(
+              ${index}
+            )
           ">
-            📺
+
+
+          ${
+            channel.image
+
+            ?
+
+            `
+            <img
+              class="channel-image"
+              src="${safeUrl(
+                channel.image
+              )}"
+              onerror="
+                this.style.visibility='hidden'
+              ">
+            `
+
+            :
+
+            `
+            <div
+              class="channel-image"
+              style="
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                font-size:45px;
+              ">
+
+              📺
+
+            </div>
+            `
+
+          }
+
+
+          <div class="channel-name">
+
+            ${escapeHTML(
+              channel.name ||
+              'قناة'
+            )}
+
           </div>
-          `
-        }
 
-        <div class="name">
-          ${escapeHTML(ch.name)}
+
+          <div class="watch-btn">
+
+            ▶ مشاهدة الآن
+
+          </div>
+
+
         </div>
 
-        <div class="watch">
-          ▶ مشاهدة الآن
-        </div>
-
-      </div>
-
-    `
-    ).join('');
+      `)
+      .join('');
 
 }
 
 
-/* =========================================
-   HOME
-========================================= */
+/* =====================================================
+   OPEN CHANNEL
+===================================================== */
 
-function goHome(){
+function openChannel(index){
 
-  currentCategory =
-    null;
-
-
-  channelsPage.style.display =
-    'none';
-
-
-  home.style.display =
-    'block';
-
-}
+  const category =
+    database.categories.find(
+      c =>
+        c.id ===
+        currentCategoryId
+    );
 
 
-/* =========================================
-   PLAY
-========================================= */
-
-function playChannel(url){
-
-  if(!url)
+  if(!category)
     return;
 
 
-  player.classList.add(
+  const channel =
+    category.channels[index];
+
+
+  if(!channel)
+    return;
+
+
+  let url = '';
+
+
+  /*
+     يقبل أكثر من شكل
+  */
+
+  if(channel.streamUrl){
+
+    url =
+      channel.streamUrl;
+
+  }
+  else if(channel.url){
+
+    url =
+      channel.url;
+
+  }
+  else if(channel.streamToken){
+
+    url =
+      tokenToUrl(
+        channel.streamToken
+      );
+
+  }
+  else if(channel.token){
+
+    url =
+      tokenToUrl(
+        channel.token
+      );
+
+  }
+
+
+  if(!url){
+
+    showToast(
+      'رابط البث غير متاح'
+    );
+
+    return;
+
+  }
+
+
+  isStreamViewOpen =
+    true;
+
+
+  currentStreamUrl =
+    url;
+
+
+  streamView.classList.add(
     'show'
   );
 
 
-  loading.classList.remove(
-    'hide'
+  document.body.style.overflow =
+    'hidden';
+
+
+  playStream(
+    url
   );
+
+
+  requestFullscreenAndLandscape();
+
+
+  history.pushState(
+    {
+      stream:true
+    },
+    ''
+  );
+
+}
+
+
+/* =====================================================
+   FULLSCREEN
+===================================================== */
+
+async function requestFullscreenAndLandscape(){
+
+  try{
+
+    if(
+      !document.fullscreenElement &&
+      playerBox.requestFullscreen
+    ){
+
+      await playerBox.requestFullscreen();
+
+    }
+
+  }
+  catch(error){}
+
+
+  try{
+
+    if(
+      screen.orientation &&
+      screen.orientation.lock
+    ){
+
+      await screen.orientation.lock(
+        'landscape'
+      );
+
+    }
+
+  }
+  catch(error){}
+
+}
+
+
+/* =====================================================
+   UNLOCK
+===================================================== */
+
+function unlockOrientation(){
+
+  try{
+
+    if(
+      screen.orientation &&
+      screen.orientation.unlock
+    ){
+
+      screen.orientation.unlock();
+
+    }
+
+  }
+  catch(error){}
+
+}
+
+
+/* =====================================================
+   PLAY STREAM
+===================================================== */
+
+function playStream(url){
+
+  if(!url){
+
+    showPlayerError(
+      'رابط البث غير موجود'
+    );
+
+    return;
+
+  }
+
+
+  currentStreamUrl =
+    url;
+
+
+  placeholder.classList.remove(
+    'hidden'
+  );
+
+
+  placeholder.innerHTML = `
+
+    <div class="loading-player"></div>
+
+    <span>
+      جاري تشغيل البث...
+    </span>
+
+  `;
 
 
   destroyHLS();
 
 
-  video.pause();
+  try{
 
-  video.removeAttribute(
-    'src'
-  );
+    video.pause();
 
-  video.load();
+    video.removeAttribute(
+      'src'
+    );
 
+    video.load();
+
+  }
+  catch(error){}
+
+
+  /*
+    نحافظ على طريقة المشغل الأصلية:
+    إذا كان الرابط m3u8
+    نستخدم HLS.js.
+  */
 
   const lower =
-    url.toLowerCase();
+    String(url).toLowerCase();
 
 
   const isM3U8 =
@@ -988,28 +2336,112 @@ function playChannel(url){
     lower.includes('m3u8');
 
 
+  /* =============================
+     HLS.JS
+  ============================= */
+
   if(
     isM3U8 &&
+    typeof Hls !== 'undefined' &&
     Hls.isSupported()
   ){
 
+    startHLS(
+      url
+    );
+
+    return;
+
+  }
+
+
+  /* =============================
+     NATIVE HLS
+  ============================= */
+
+  if(
+    isM3U8 &&
+    video.canPlayType(
+      'application/vnd.apple.mpegurl'
+    )
+  ){
+
+    startNative(
+      url
+    );
+
+    return;
+
+  }
+
+
+  /*
+    رابط مباشر:
+    MP4 / WebM / وغيرها مما
+    يدعمه المتصفح.
+  */
+
+  startNative(
+    url
+  );
+
+}
+
+
+/* =====================================================
+   START HLS
+===================================================== */
+
+function startHLS(url){
+
+  try{
+
     hls =
       new Hls({
+
         lowLatencyMode:true,
+
         enableWorker:true,
+
         backBufferLength:30,
-        maxBufferLength:30
+
+        maxBufferLength:30,
+
+        maxMaxBufferLength:60,
+
+        xhrSetup:function(xhr){
+
+          xhr.withCredentials =
+            false;
+
+        }
+
       });
 
 
-    hls.attachMedia(video);
+    hls.attachMedia(
+      video
+    );
 
 
     hls.on(
       Hls.Events.MEDIA_ATTACHED,
       ()=>{
 
-        hls.loadSource(url);
+        try{
+
+          hls.loadSource(
+            url
+          );
+
+        }
+        catch(error){
+
+          startNative(
+            url
+          );
+
+        }
 
       }
     );
@@ -1019,10 +2451,17 @@ function playChannel(url){
       Hls.Events.MANIFEST_PARSED,
       ()=>{
 
-        hideLoading();
+        hidePlaceholder();
+
 
         video.play()
-          .catch(()=>{});
+          .catch(()=>{
+
+            showToast(
+              'اضغط تشغيل لبدء البث'
+            );
+
+          });
 
       }
     );
@@ -1036,162 +2475,834 @@ function playChannel(url){
           return;
 
 
-        loading.innerHTML = `
-          <div style="font-size:40px">
-            ⚠️
-          </div>
+        /*
+          نحاول إصلاح أخطاء الشبكة
+        */
 
-          <div>
-            تعذر تشغيل البث
-          </div>
-        `;
+        if(
+          data.type ===
+          Hls.ErrorTypes.NETWORK_ERROR
+        ){
+
+          try{
+
+            hls.startLoad();
+
+            return;
+
+          }
+          catch(error){}
+
+        }
+
+
+        /*
+          نحاول إصلاح أخطاء الفيديو
+        */
+
+        if(
+          data.type ===
+          Hls.ErrorTypes.MEDIA_ERROR
+        ){
+
+          try{
+
+            hls.recoverMediaError();
+
+            return;
+
+          }
+          catch(error){}
+
+        }
+
+
+        showPlayerError(
+          'تعذر تشغيل البث بهذا الرابط'
+        );
 
       }
     );
 
+  }
+  catch(error){
 
-    return;
+    /*
+      إذا فشل HLS.js
+      نجرب تشغيل الرابط مباشرة.
+    */
+
+    startNative(
+      url
+    );
 
   }
 
+}
 
-  if(
-    isM3U8 &&
-    video.canPlayType(
-      'application/vnd.apple.mpegurl'
-    )
-  ){
+
+/* =====================================================
+   NATIVE
+===================================================== */
+
+function startNative(url){
+
+  try{
 
     video.src =
       url;
 
     video.load();
 
-    video.play()
-      .then(
-        hideLoading
-      )
-      .catch(
-        hideLoading
-      );
 
-    return;
+    const promise =
+      video.play();
+
+
+    if(promise){
+
+      promise.then(()=>{
+
+        hidePlaceholder();
+
+      })
+      .catch(()=>{
+
+        hidePlaceholder();
+
+        showToast(
+          'اضغط زر التشغيل لبدء البث'
+        );
+
+      });
+
+    }
+
+  }
+  catch(error){
+
+    showPlayerError(
+      'الرابط غير مدعوم في هذا المتصفح'
+    );
 
   }
 
-
-  video.src =
-    url;
-
-  video.load();
-
-  video.play()
-    .then(
-      hideLoading
-    )
-    .catch(
-      hideLoading
-    );
-
 }
 
 
-/* =========================================
-   VIDEO
-========================================= */
-
-video.addEventListener(
-  'playing',
-  hideLoading
-);
-
+/* =====================================================
+   VIDEO EVENTS
+===================================================== */
 
 video.addEventListener(
   'loadedmetadata',
-  hideLoading
+  ()=>{
+
+    hidePlaceholder();
+
+  }
 );
 
 
-function hideLoading(){
+video.addEventListener(
+  'playing',
+  ()=>{
 
-  loading.classList.add(
-    'hide'
+    hidePlaceholder();
+
+  }
+);
+
+
+video.addEventListener(
+  'error',
+  ()=>{
+
+    if(!hls){
+
+      showPlayerError(
+        'تعذر تشغيل رابط البث'
+      );
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   PLACEHOLDER
+===================================================== */
+
+function hidePlaceholder(){
+
+  placeholder.classList.add(
+    'hidden'
   );
 
 }
 
 
-/* =========================================
-   CLOSE
-========================================= */
+function showPlayerError(message){
 
-function closePlayer(){
-
-  destroyHLS();
-
-
-  video.pause();
-
-  video.removeAttribute(
-    'src'
+  placeholder.classList.remove(
+    'hidden'
   );
 
-  video.load();
+
+  placeholder.innerHTML = `
+
+    <div style="
+      font-size:42px;
+      opacity:.7;
+    ">
+      ⚠️
+    </div>
 
 
-  player.classList.remove(
-    'show'
-  );
+    <span>
+      ${escapeHTML(message)}
+    </span>
+
+
+    <button
+      onclick="retryCurrentStream()"
+      style="
+        margin-top:10px;
+        background:#dc1420;
+        border:0;
+        color:#fff;
+        padding:9px 18px;
+        border-radius:8px;
+        font-family:Cairo;
+        cursor:pointer;
+      ">
+
+      إعادة المحاولة
+
+    </button>
+
+  `;
 
 }
 
+
+/* =====================================================
+   RETRY
+===================================================== */
+
+function retryCurrentStream(){
+
+  if(currentStreamUrl){
+
+    playStream(
+      currentStreamUrl
+    );
+
+  }
+
+}
+
+
+/* =====================================================
+   DESTROY HLS
+===================================================== */
 
 function destroyHLS(){
 
   if(hls){
 
     try{
-      hls.destroy();
-    }
-    catch(e){}
 
-    hls=null;
+      hls.destroy();
+
+    }
+    catch(error){}
+
+    hls = null;
 
   }
 
 }
 
 
-/* =========================================
-   SAFE
-========================================= */
+/* =====================================================
+   STOP
+===================================================== */
 
-function escapeHTML(v){
+function stopStream(){
 
-  return String(v ?? '')
-    .replace(/&/g,'&amp;')
-    .replace(/</g,'&lt;')
-    .replace(/>/g,'&gt;')
-    .replace(/"/g,'&quot;')
-    .replace(/'/g,'&#039;');
+  destroyHLS();
+
+
+  try{
+
+    video.pause();
+
+    video.removeAttribute(
+      'src'
+    );
+
+    video.load();
+
+  }
+  catch(error){}
+
+
+  currentStreamUrl =
+    '';
+
+
+  placeholder.classList.remove(
+    'hidden'
+  );
+
+
+  placeholder.innerHTML = `
+
+    <div style="
+      font-size:42px;
+      opacity:.6;
+    ">
+      ⏹️
+    </div>
+
+    <span>
+      تم إيقاف البث
+    </span>
+
+  `;
 
 }
 
 
-function escapeAttr(v){
+/* =====================================================
+   CLOSE STREAM
+===================================================== */
 
-  return escapeHTML(v);
+function closeStream(){
+
+  if(!isStreamViewOpen)
+    return;
+
+
+  isStreamViewOpen =
+    false;
+
+
+  stopStream();
+
+
+  streamView.classList.remove(
+    'show'
+  );
+
+
+  document.body.style.overflow =
+    '';
+
+
+  unlockOrientation();
+
+
+  try{
+
+    if(
+      document.fullscreenElement &&
+      document.exitFullscreen
+    ){
+
+      document.exitFullscreen()
+        .catch(()=>{});
+
+    }
+
+  }
+  catch(error){}
+
+
+  if(
+    history.state &&
+    history.state.stream
+  ){
+
+    history.back();
+
+  }
 
 }
 
 
-/* =========================================
+/* =====================================================
+   HOME
+===================================================== */
+
+function goHome(){
+
+  currentCategoryId =
+    null;
+
+
+  channelsPage.style.display =
+    'none';
+
+
+  homePage.style.display =
+    'block';
+
+
+  backPageBtn.style.display =
+    'none';
+
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+}
+
+
+/* =====================================================
+   HISTORY
+===================================================== */
+
+window.addEventListener(
+  'popstate',
+  ()=>{
+
+    if(isStreamViewOpen){
+
+      isStreamViewOpen =
+        false;
+
+      stopStream();
+
+      streamView.classList.remove(
+        'show'
+      );
+
+      document.body.style.overflow =
+        '';
+
+      unlockOrientation();
+
+      return;
+
+    }
+
+    if(
+      channelsPage.style.display !==
+      'none'
+    ){
+
+      goHome();
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   PLAY / PAUSE
+===================================================== */
+
+function togglePlay(){
+
+  if(video.paused){
+
+    video.play()
+      .catch(()=>{
+
+        showToast(
+          'اضغط مرة أخرى للتشغيل'
+        );
+
+      });
+
+  }
+  else{
+
+    video.pause();
+
+  }
+
+}
+
+
+video.addEventListener(
+  'play',
+  ()=>{
+
+    playIcon.innerHTML =
+      '<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>';
+
+  }
+);
+
+
+video.addEventListener(
+  'pause',
+  ()=>{
+
+    playIcon.innerHTML =
+      '<path d="M8 5v14l11-7z"/>';
+
+  }
+);
+
+
+/* =====================================================
+   MUTE
+===================================================== */
+
+function toggleMute(){
+
+  video.muted =
+    !video.muted;
+
+
+  if(video.muted){
+
+    volIcon.innerHTML =
+      '<path d="M4 9v6h4l5 5V4L8 9H4z"/>';
+
+  }
+  else{
+
+    volIcon.innerHTML =
+      '<path d="M3 9v6h4l5 5V4L7 9H3z"/>';
+
+  }
+
+}
+
+
+/* =====================================================
+   PROGRESS
+===================================================== */
+
+video.addEventListener(
+  'timeupdate',
+  ()=>{
+
+    if(
+      video.duration &&
+      isFinite(video.duration)
+    ){
+
+      const percent =
+        (
+          video.currentTime /
+          video.duration
+        ) * 100;
+
+
+      progressFill.style.width =
+        percent + '%';
+
+
+      timeDisplay.textContent =
+        fmt(video.currentTime) +
+        ' / ' +
+        fmt(video.duration);
+
+    }
+    else{
+
+      progressFill.style.width =
+        '100%';
+
+      timeDisplay.innerHTML =
+        '🔴 مباشر';
+
+    }
+
+  }
+);
+
+
+function fmt(seconds){
+
+  if(
+    !seconds ||
+    isNaN(seconds) ||
+    !isFinite(seconds)
+  ){
+
+    return '0:00';
+
+  }
+
+
+  const h =
+    Math.floor(
+      seconds / 3600
+    );
+
+
+  const m =
+    Math.floor(
+      (seconds % 3600) / 60
+    );
+
+
+  const s =
+    Math.floor(
+      seconds % 60
+    )
+    .toString()
+    .padStart(2,'0');
+
+
+  if(h > 0){
+
+    return (
+      h +
+      ':' +
+      m.toString().padStart(2,'0') +
+      ':' +
+      s
+    );
+
+  }
+
+
+  return (
+    m +
+    ':' +
+    s
+  );
+
+}
+
+
+/* =====================================================
+   SEEK
+===================================================== */
+
+function seekVideo(event){
+
+  if(
+    !video.duration ||
+    !isFinite(video.duration)
+  ){
+
+    return;
+
+  }
+
+
+  const rect =
+    progressWrap.getBoundingClientRect();
+
+
+  let percent =
+    (
+      event.clientX -
+      rect.left
+    ) /
+    rect.width;
+
+
+  percent =
+    Math.max(
+      0,
+      Math.min(
+        1,
+        percent
+      )
+    );
+
+
+  video.currentTime =
+    percent *
+    video.duration;
+
+}
+
+
+progressWrap.addEventListener(
+  'pointerdown',
+  event=>{
+
+    isDraggingSeek =
+      true;
+
+    try{
+
+      progressWrap.setPointerCapture(
+        event.pointerId
+      );
+
+    }
+    catch(error){}
+
+    seekVideo(event);
+
+    event.preventDefault();
+
+  }
+);
+
+
+progressWrap.addEventListener(
+  'pointermove',
+  event=>{
+
+    if(isDraggingSeek){
+
+      seekVideo(event);
+
+      event.preventDefault();
+
+    }
+
+  }
+);
+
+
+progressWrap.addEventListener(
+  'pointerup',
+  event=>{
+
+    isDraggingSeek =
+      false;
+
+    try{
+
+      progressWrap.releasePointerCapture(
+        event.pointerId
+      );
+
+    }
+    catch(error){}
+
+  }
+);
+
+
+progressWrap.addEventListener(
+  'pointercancel',
+  ()=>{
+    isDraggingSeek =
+      false;
+  }
+);
+
+
+/* =====================================================
+   CONTROLS
+===================================================== */
+
+playerBox.addEventListener(
+  'click',
+  event=>{
+
+    if(
+      customControls.contains(
+        event.target
+      )
+    ){
+
+      return;
+
+    }
+
+
+    if(
+      event.target.classList.contains(
+        'back-player'
+      )
+    ){
+
+      return;
+
+    }
+
+
+    if(isDraggingSeek)
+      return;
+
+
+    if(controlsVisible){
+
+      customControls.classList.add(
+        'hidden'
+      );
+
+      controlsVisible =
+        false;
+
+    }
+    else{
+
+      customControls.classList.remove(
+        'hidden'
+      );
+
+      controlsVisible =
+        true;
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   KEYBOARD
+===================================================== */
+
+document.addEventListener(
+  'keydown',
+  event=>{
+
+    if(
+      event.key === 'Escape' &&
+      isStreamViewOpen
+    ){
+
+      closeStream();
+
+    }
+
+
+    if(
+      event.key === ' ' &&
+      isStreamViewOpen
+    ){
+
+      event.preventDefault();
+
+      togglePlay();
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   BASIC PROTECTION
+===================================================== */
+
+document.addEventListener(
+  'contextmenu',
+  event=>{
+    event.preventDefault();
+  }
+);
+
+
+/* =====================================================
    START
-========================================= */
+===================================================== */
 
 renderCategories();
 
 </script>
 
 </body>
-</html>
+  </html>
