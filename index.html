@@ -50,7 +50,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .quick-sub{color:#6d6d8a;font-size:10.5px;font-weight:600;}
 
 /* ═══════════════════════════════════════════════════
-   🎬 نافذة MX Player فقط
+   🎬 نافذة MX Player + Play Store
    ═══════════════════════════════════════════════════ */
 .player-modal{
     position:fixed;inset:0;z-index:9999;
@@ -289,7 +289,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 </div>
 
 <!-- ═══════════════════════════════════════════════════
-   🎬 نافذة MX Player فقط
+   🎬 نافذة MX Player
    ═══════════════════════════════════════════════════ -->
 <div class="player-modal" id="playerModal">
     <div class="pm-panel">
@@ -298,7 +298,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
                 <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </div>
             <div class="pm-title">تشغيل في MX Player</div>
-            <div class="pm-sub">اضغط الزر لفتح القناة في MX Player<br>لو مش مثبت، هيتحمّل من Google Play</div>
+            <div class="pm-sub">اضغط الزر لفتح القناة<br>لو مش مثبت، هيتحمّل من Google Play</div>
         </div>
         
         <div class="pm-players">
@@ -310,7 +310,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
         </div>
         
         <div class="pm-note">
-            💡 <strong>MX Player</strong> هيفتح لوحده — لو مش مثبت هيروح Google Play
+            💡 لو <strong>MX Player</strong> مش مثبت، هيفتحلك Google Play تلقائياً
         </div>
     </div>
 </div>
@@ -330,7 +330,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 <div class="menu-text"><div class="menu-name">حول العنكبوت TV</div><div class="menu-sub">الإصدار 1.0</div></div>
 <svg class="menu-arrow-svg" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
 </div>
-<div class="menu-item" onclick="showInfo('الأسئلة الشائعة','كيف أشغل البث؟\nأدخل كود العنكبوت واضغط تشغيل، هيفتح MX Player تلقائياً.\n\nلو MX مش مثبت؟\nهيتحمّل من Google Play.\n\nكيف أحصل على كود؟\nمن خلال قناتنا الرسمية @alankabootsport')">
+<div class="menu-item" onclick="showInfo('الأسئلة الشائعة','كيف أشغل البث؟\nأدخل كود العنكبوت واضغط تشغيل، واختار MX Player.\n\nلو MX مش مثبت؟\nهيتحمّل من Google Play.\n\nكيف أحصل على كود؟\nمن خلال قناتنا الرسمية @alankabootsport')">
 <div class="menu-icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
 <div class="menu-text"><div class="menu-name">الأسئلة الشائعة</div><div class="menu-sub">إجابات على استفساراتك</div></div>
 <svg class="menu-arrow-svg" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
@@ -392,18 +392,13 @@ let currentStreamUrl = "";
 /* ═══════════════════════════════════════════════════
    🔑 ثوابت MX Player
    ═══════════════════════════════════════════════════ */
-const MX_FREE_PACKAGE = "com.mxtech.videoplayer.ad";
-const MX_PRO_PACKAGE = "com.mxtech.videoplayer.pro";
-const MX_PLAY_STORE = "https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad";
-const MX_PRO_PLAY_STORE = "https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.pro";
+const MX_PACKAGE = "com.mxtech.videoplayer.ad";
+const MX_PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad";
 
 function setMsg(text, type){ mainMsg.textContent = text || ""; mainMsg.className = "msg " + (type || ""); }
 
 /* ═══════════════════════════════════════════════════
-   🎬 تشغيل الرابط في MX Player
-   - لو مثبت → يفتح MX Player مباشرة
-   - لو مش مثبت → يوديه Google Play
-   - لو رجع من Play → يحاول تاني تلقائياً
+   🎬 تشغيل في MX Player — مع Fallback ذكي لـ Google Play
    ═══════════════════════════════════════════════════ */
 window.launchMXPlayer = function(){
     const url = currentStreamUrl;
@@ -413,46 +408,40 @@ window.launchMXPlayer = function(){
     const scheme = isHttps ? "https" : "http";
     const urlNoProto = url.replace(/^https?:\/\//i, "");
     
-    /* ⭐ جرّب MX Player Pro الأول، بعدين العادي */
-    const intentWithPro = "intent://" + urlNoProto + 
+    /* ⭐ flag: هل فتح التطبيق فعلاً؟ */
+    let appOpened = false;
+    const markOpened = function(){ appOpened = true; };
+    
+    /* نضيف مستمعين للكشف عن فتح التطبيق */
+    document.addEventListener("visibilitychange", markOpened, { once: true });
+    window.addEventListener("pagehide", markOpened, { once: true });
+    window.addEventListener("blur", markOpened, { once: true });
+    
+    /* بناء الـ intent */
+    const intentUrl = "intent://" + urlNoProto + 
         "#Intent;scheme=" + scheme + 
         ";type=video/*" + 
-        ";package=" + MX_PRO_PACKAGE + 
+        ";package=" + MX_PACKAGE + 
         ";action=android.intent.action.VIEW" + 
         ";category=android.intent.category.BROWSABLE" + 
+        ";S.browser_fallback_url=" + encodeURIComponent(MX_PLAY_STORE_URL) + 
         ";end";
     
-    const intentWithFree = "intent://" + urlNoProto + 
-        "#Intent;scheme=" + scheme + 
-        ";type=video/*" + 
-        ";package=" + MX_FREE_PACKAGE + 
-        ";action=android.intent.action.VIEW" + 
-        ";category=android.intent.category.BROWSABLE" + 
-        ";S.browser_fallback_url=" + encodeURIComponent(MX_PLAY_STORE) + 
-        ";end";
-    
-    /* نجرّب Pro الأول */
+    /* ⭐ نحاول نفتح MX Player */
     try{
-        const t0 = Date.now();
-        window.location.href = intentWithPro;
-        
-        setTimeout(function(){
-            /* لو لسه على الصفحة بعد 700ms → Pro مش مثبت → جرّب العادي */
-            if(document.visibilityState === "visible"){
-                window.location.href = intentWithFree;
-                
-                setTimeout(function(){
-                    /* لو لسه على الصفحة → الاتنين مش مثبتين → Google Play */
-                    if(document.visibilityState === "visible"){
-                        window.location.href = MX_PLAY_STORE;
-                    }
-                }, 700);
-            }
-        }, 700);
+        window.location.href = intentUrl;
     } catch(e){
-        /* لو Intent مش مدعوم → افتح Google Play */
-        window.location.href = MX_PLAY_STORE;
+        window.location.href = MX_PLAY_STORE_URL;
+        return;
     }
+    
+    /* ⭐ بعد 1200ms، لو لسه على الصفحة → MX مش مثبت → Google Play */
+    setTimeout(function(){
+        if(!appOpened && document.visibilityState === "visible" && !document.hidden){
+            /* MX مش مثبت → افتح Google Play */
+            window.location.href = MX_PLAY_STORE_URL;
+        }
+    }, 1200);
 };
 
 /* ═══════════════════════════════════════════════════
@@ -498,20 +487,11 @@ async function playByCode(rawCode){
         
         currentStreamUrl = data.url;
         
-        setMsg("✓ تم التحقق — جاري فتح MX Player", "ok");
+        setMsg("✓ تم التحقق — اختر MX Player", "ok");
         setTimeout(()=> setMsg("", ""), 3000);
         
-        /* ⭐ افتح MX Player تلقائياً بعد نصف ثانية */
-        setTimeout(function(){
-            window.launchMXPlayer();
-        }, 500);
-        
-        /* ⭐ اظهر النافذة الاحتياطية كخيار تاني */
-        setTimeout(function(){
-            if(document.visibilityState === "visible"){
-                showPlayerModal(data.url);
-            }
-        }, 2500);
+        /* ⭐ نفتح نافذة MX Player */
+        showPlayerModal(data.url);
         
         watchChannel(code);
         
@@ -648,4 +628,4 @@ document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ cleanH
 
 </script>
 </body>
-   </html>
+</html>
