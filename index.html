@@ -50,7 +50,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 .quick-sub{color:#6d6d8a;font-size:10.5px;font-weight:600;}
 
 /* ═══════════════════════════════════════════════════
-   🎬 نافذة احتياطية
+   🎬 نافذة MX Player فقط
    ═══════════════════════════════════════════════════ */
 .player-modal{
     position:fixed;inset:0;z-index:9999;
@@ -65,31 +65,30 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
     width:100%;max-width:540px;
     background:linear-gradient(180deg,#12121f,#0a0a18);
     border-radius:28px 28px 0 0;
-    border-top:1px solid rgba(0,255,136,.3);
-    padding:24px 18px 30px;
-    max-height:85vh;overflow-y:auto;
+    border-top:1px solid rgba(59,130,246,.35);
+    padding:26px 20px 30px;
     animation:pmSlide .3s cubic-bezier(.16,1,.3,1);
 }
 @keyframes pmSlide{from{transform:translateY(100%)}to{transform:translateY(0)}}
 
 .pm-head{text-align:center;margin-bottom:22px;}
 .pm-icon{
-    width:64px;height:64px;border-radius:20px;
-    background:linear-gradient(135deg,rgba(139,92,246,.25),rgba(0,255,136,.15));
-    border:1px solid rgba(139,92,246,.35);
+    width:76px;height:76px;border-radius:22px;
+    background:linear-gradient(135deg,#3b82f6,#1e40af);
     display:flex;align-items:center;justify-content:center;
-    font-size:30px;margin:0 auto 12px;
-    box-shadow:0 8px 30px rgba(139,92,246,.3);
+    margin:0 auto 14px;
+    box-shadow:0 10px 35px rgba(59,130,246,.45);
 }
-.pm-title{color:#fff;font-size:17px;font-weight:900;margin-bottom:6px;}
-.pm-sub{color:#8b8ba7;font-size:12px;line-height:1.7;font-weight:600;}
+.pm-icon svg{width:40px;height:40px;fill:#fff;}
+.pm-title{color:#fff;font-size:18px;font-weight:900;margin-bottom:6px;}
+.pm-sub{color:#8b8ba7;font-size:12.5px;line-height:1.7;font-weight:600;}
 
-.pm-players{display:flex;flex-direction:column;gap:10px;}
+.pm-players{display:flex;flex-direction:column;gap:12px;}
 
 .pm-btn{
-    width:100%;padding:15px 18px;
+    width:100%;padding:16px 18px;
     border:0;border-radius:14px;
-    font-size:14px;font-weight:800;
+    font-size:15px;font-weight:800;
     cursor:pointer;font-family:'Cairo',sans-serif;
     display:flex;align-items:center;justify-content:center;gap:10px;
     transition:.15s;color:#fff;
@@ -101,37 +100,24 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 }
 .pm-btn .pm-ico svg{width:26px;height:26px;fill:currentColor;}
 
-.pm-btn.system{background:linear-gradient(135deg,#00ff88,#00cc6a);color:#001a0e;box-shadow:0 8px 24px rgba(0,255,136,.35);}
-.pm-btn.vlc{background:linear-gradient(135deg,#ff8c1a,#e85d00);box-shadow:0 8px 24px rgba(255,107,0,.35);}
-.pm-btn.mx{background:linear-gradient(135deg,#3b82f6,#1e40af);box-shadow:0 8px 24px rgba(59,130,246,.35);}
-.pm-btn.browser{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);}
-.pm-btn.close{background:transparent;color:#6d6d8a;border:1px solid rgba(255,255,255,.08);font-size:13px;padding:12px;margin-top:4px;}
+.pm-btn.mx{
+    background:linear-gradient(135deg,#3b82f6,#1e40af);
+    box-shadow:0 10px 30px rgba(59,130,246,.4);
+    font-size:16px;
+    padding:18px 20px;
+}
+.pm-btn.close{
+    background:transparent;color:#6d6d8a;
+    border:1px solid rgba(255,255,255,.08);
+    font-size:13px;padding:12px;
+    margin-top:4px;
+}
 
 .pm-note{
-    color:#5a5a75;font-size:10.5px;text-align:center;
-    margin-top:14px;line-height:1.7;font-weight:600;
+    color:#5a5a75;font-size:11px;text-align:center;
+    margin-top:16px;line-height:1.8;font-weight:600;
 }
-
-/* شاشة التحميل أثناء فتح المشغل */
-.opening-overlay{
-    position:fixed;inset:0;z-index:10000;
-    background:rgba(0,0,0,.95);
-    display:none;align-items:center;justify-content:center;
-    flex-direction:column;gap:20px;padding:20px;
-    backdrop-filter:blur(20px);
-}
-.opening-overlay.show{display:flex;}
-.opening-spinner{
-    width:60px;height:60px;
-    border:4px solid rgba(0,255,136,.15);
-    border-top-color:#00ff88;
-    border-radius:50%;
-    animation:opSpin 1s linear infinite;
-    box-shadow:0 0 30px rgba(0,255,136,.4);
-}
-@keyframes opSpin{to{transform:rotate(360deg)}}
-.opening-text{color:#00ff88;font-size:14px;font-weight:800;text-align:center;line-height:1.9;}
-.opening-sub{color:#6d6d8a;font-size:11px;font-weight:600;margin-top:6px;}
+.pm-note strong{color:#3b82f6;font-weight:800;}
 
 /* ═══════════════════════════════════════════════════ */
 
@@ -303,50 +289,28 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 </div>
 
 <!-- ═══════════════════════════════════════════════════
-   🎬 شاشة فتح المشغل — أثناء الانتظار
-   ═══════════════════════════════════════════════════ -->
-<div class="opening-overlay" id="openingOverlay">
-    <div class="opening-spinner"></div>
-    <div class="opening-text">
-        جاري فتح المشغل...
-        <div class="opening-sub">لو النافذة مش ظهرت، اضغط الزر تحت</div>
-    </div>
-    <button class="pm-btn system" onclick="triggerAndroidChooser()" style="max-width:280px;margin-top:8px;">
-        <span class="pm-ico"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14V7l7 5-7 5z"/></svg></span>
-        فتح قائمة المشغلات
-    </button>
-    <button class="pm-btn close" onclick="closeOpeningOverlay()" style="max-width:280px;">✕ إغلاق</button>
-</div>
-
-<!-- ═══════════════════════════════════════════════════
-   🎬 نافذة احتياطية
+   🎬 نافذة MX Player فقط
    ═══════════════════════════════════════════════════ -->
 <div class="player-modal" id="playerModal">
     <div class="pm-panel">
         <div class="pm-head">
-            <div class="pm-icon">🎬</div>
-            <div class="pm-title">مش قادر يفتح المشغل تلقائياً</div>
-            <div class="pm-sub">جرب تفتحه من الطرق دي</div>
+            <div class="pm-icon">
+                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+            <div class="pm-title">تشغيل في MX Player</div>
+            <div class="pm-sub">اضغط الزر لفتح القناة في MX Player<br>لو مش مثبت، هيتحمّل من Google Play</div>
         </div>
         
         <div class="pm-players">
-            <button class="pm-btn system" onclick="triggerAndroidChooser()">
-                <span class="pm-ico"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14V7l7 5-7 5z"/></svg></span>
-                فتح قائمة مشغلات الجهاز
-            </button>
-            <button class="pm-btn vlc" onclick="openInPlayer('vlc')">
-                <span class="pm-ico"><svg viewBox="0 0 24 24"><path d="M12.03 2.25a1.5 1.5 0 0 0-1.5 1.5c0 .5.25.94.63 1.22L3.4 19.16a1.5 1.5 0 0 0 1.28 2.25h14.64a1.5 1.5 0 0 0 1.28-2.25L12.9 4.97c.38-.28.63-.72.63-1.22a1.5 1.5 0 0 0-1.5-1.5zM12 8.5l4.75 9.5h-9.5L12 8.5z"/></svg></span>
-                VLC (لو مش مثبت هيفتح Play Store)
-            </button>
-            <button class="pm-btn mx" onclick="openInPlayer('mx')">
+            <button class="pm-btn mx" onclick="launchMXPlayer()">
                 <span class="pm-ico"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
-                MX Player
-            </button>
-            <button class="pm-btn browser" onclick="openInPlayer('browser')">
-                <span class="pm-ico"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14V7l7 5-7 5z"/></svg></span>
-                فتح في المتصفح
+                تشغيل في MX Player
             </button>
             <button class="pm-btn close" onclick="closePlayerModal()">✕ إغلاق</button>
+        </div>
+        
+        <div class="pm-note">
+            💡 <strong>MX Player</strong> هيفتح لوحده — لو مش مثبت هيروح Google Play
         </div>
     </div>
 </div>
@@ -366,7 +330,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;ba
 <div class="menu-text"><div class="menu-name">حول العنكبوت TV</div><div class="menu-sub">الإصدار 1.0</div></div>
 <svg class="menu-arrow-svg" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
 </div>
-<div class="menu-item" onclick="showInfo('الأسئلة الشائعة','كيف أشغل البث؟\nأدخل كود العنكبوت واضغط تشغيل، واختار المشغل من قائمة الجهاز.\n\nلو المشغل مش عندي؟\nهيتحمّل تلقائياً من Google Play.\n\nكيف أحصل على كود؟\nمن خلال قناتنا الرسمية @alankabootsport')">
+<div class="menu-item" onclick="showInfo('الأسئلة الشائعة','كيف أشغل البث؟\nأدخل كود العنكبوت واضغط تشغيل، هيفتح MX Player تلقائياً.\n\nلو MX مش مثبت؟\nهيتحمّل من Google Play.\n\nكيف أحصل على كود؟\nمن خلال قناتنا الرسمية @alankabootsport')">
 <div class="menu-icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg></div>
 <div class="menu-text"><div class="menu-name">الأسئلة الشائعة</div><div class="menu-sub">إجابات على استفساراتك</div></div>
 <svg class="menu-arrow-svg" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
@@ -421,116 +385,82 @@ const codeInput = document.getElementById("codeInput");
 const nameInput = document.getElementById("nameInput");
 const mainMsg = document.getElementById("mainMsg");
 const playerModal = document.getElementById("playerModal");
-const openingOverlay = document.getElementById("openingOverlay");
 
 let activeListener = null;
 let currentStreamUrl = "";
 
+/* ═══════════════════════════════════════════════════
+   🔑 ثوابت MX Player
+   ═══════════════════════════════════════════════════ */
+const MX_FREE_PACKAGE = "com.mxtech.videoplayer.ad";
+const MX_PRO_PACKAGE = "com.mxtech.videoplayer.pro";
+const MX_PLAY_STORE = "https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad";
+const MX_PRO_PLAY_STORE = "https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.pro";
+
 function setMsg(text, type){ mainMsg.textContent = text || ""; mainMsg.className = "msg " + (type || ""); }
 
 /* ═══════════════════════════════════════════════════
-   🎬 فتح قائمة مشغلات الجهاز (Android System Chooser)
-   ده اللي بيفتح شاشة "فتح باستخدام" زي الصورة
+   🎬 تشغيل الرابط في MX Player
+   - لو مثبت → يفتح MX Player مباشرة
+   - لو مش مثبت → يوديه Google Play
+   - لو رجع من Play → يحاول تاني تلقائياً
    ═══════════════════════════════════════════════════ */
-window.triggerAndroidChooser = function(){
-    if(!currentStreamUrl){ alert("مفيش رابط"); return; }
-    
-    const url = currentStreamUrl;
-    
-    try{
-        const isHttps = url.toLowerCase().startsWith("https");
-        const scheme = isHttps ? "https" : "http";
-        const urlNoProto = url.replace(/^https?:\/\//i, "");
-        
-        /* ⭐ المهم: بدون package= → الأندرويد يفتح قائمة "فتح باستخدام" */
-        const intentUrl = "intent://" + urlNoProto + 
-            "#Intent;scheme=" + scheme + 
-            ";type=video/*" + 
-            ";action=android.intent.action.VIEW" + 
-            ";category=android.intent.category.BROWSABLE" + 
-            ";end";
-        
-        window.location.href = intentUrl;
-        
-    } catch(e){
-        console.error(e);
-        alert("حدث خطأ — حاول تاني");
-    }
-};
-
-/* ═══════════════════════════════════════════════════
-   🎬 فتح مشغل معين (VLC / MX / غيرهم)
-   ═══════════════════════════════════════════════════ */
-window.openInPlayer = function(type){
+window.launchMXPlayer = function(){
     const url = currentStreamUrl;
     if(!url){ alert("مفيش رابط"); return; }
     
-    // المتصفح
-    if(type === "browser"){
-        window.open(url, "_blank");
-        return;
-    }
+    const isHttps = url.toLowerCase().startsWith("https");
+    const scheme = isHttps ? "https" : "http";
+    const urlNoProto = url.replace(/^https?:\/\//i, "");
     
+    /* ⭐ جرّب MX Player Pro الأول، بعدين العادي */
+    const intentWithPro = "intent://" + urlNoProto + 
+        "#Intent;scheme=" + scheme + 
+        ";type=video/*" + 
+        ";package=" + MX_PRO_PACKAGE + 
+        ";action=android.intent.action.VIEW" + 
+        ";category=android.intent.category.BROWSABLE" + 
+        ";end";
+    
+    const intentWithFree = "intent://" + urlNoProto + 
+        "#Intent;scheme=" + scheme + 
+        ";type=video/*" + 
+        ";package=" + MX_FREE_PACKAGE + 
+        ";action=android.intent.action.VIEW" + 
+        ";category=android.intent.category.BROWSABLE" + 
+        ";S.browser_fallback_url=" + encodeURIComponent(MX_PLAY_STORE) + 
+        ";end";
+    
+    /* نجرّب Pro الأول */
     try{
-        const isHttps = url.toLowerCase().startsWith("https");
-        const scheme = isHttps ? "https" : "http";
-        const urlNoProto = url.replace(/^https?:\/\//i, "");
-        
-        let packageName = "";
-        let playStoreUrl = "";
-        
-        if(type === "vlc"){
-            packageName = "org.videolan.vlc";
-            playStoreUrl = "https://play.google.com/store/apps/details?id=org.videolan.vlc";
-        } else if(type === "mx"){
-            packageName = "com.mxtech.videoplayer.ad";
-            playStoreUrl = "https://play.google.com/store/apps/details?id=com.mxtech.videoplayer.ad";
-        }
-        
-        if(!packageName){
-            triggerAndroidChooser();
-            return;
-        }
-        
-        const intentUrl = "intent://" + urlNoProto + 
-            "#Intent;scheme=" + scheme + 
-            ";type=video/*" + 
-            ";package=" + packageName + 
-            ";action=android.intent.action.VIEW" + 
-            ";category=android.intent.category.BROWSABLE" + 
-            ";S.browser_fallback_url=" + encodeURIComponent(playStoreUrl) + 
-            ";end";
-        
-        window.location.href = intentUrl;
+        const t0 = Date.now();
+        window.location.href = intentWithPro;
         
         setTimeout(function(){
+            /* لو لسه على الصفحة بعد 700ms → Pro مش مثبت → جرّب العادي */
             if(document.visibilityState === "visible"){
-                window.location.href = playStoreUrl;
+                window.location.href = intentWithFree;
+                
+                setTimeout(function(){
+                    /* لو لسه على الصفحة → الاتنين مش مثبتين → Google Play */
+                    if(document.visibilityState === "visible"){
+                        window.location.href = MX_PLAY_STORE;
+                    }
+                }, 700);
             }
-        }, 1500);
-        
+        }, 700);
     } catch(e){
-        console.error(e);
-        alert("حدث خطأ — جرب مشغل آخر");
+        /* لو Intent مش مدعوم → افتح Google Play */
+        window.location.href = MX_PLAY_STORE;
     }
 };
 
 /* ═══════════════════════════════════════════════════
-   🎬 إظهار / إغلاق الشاشات
+   🎬 إظهار / إغلاق النافذة
    ═══════════════════════════════════════════════════ */
-function showOpeningOverlay(){
-    openingOverlay.classList.add("show");
-}
-
-function closeOpeningOverlay(){
-    openingOverlay.classList.remove("show");
-}
-
-window.closeOpeningOverlay = closeOpeningOverlay;
-
-function showPlayerModal(){
+function showPlayerModal(url){
+    currentStreamUrl = url;
     playerModal.classList.add("show");
-    closeOpeningOverlay();
 }
 
 function closePlayerModal(){
@@ -568,23 +498,20 @@ async function playByCode(rawCode){
         
         currentStreamUrl = data.url;
         
-        setMsg("✓ تم التحقق — جاري فتح المشغل", "ok");
+        setMsg("✓ تم التحقق — جاري فتح MX Player", "ok");
         setTimeout(()=> setMsg("", ""), 3000);
         
-        /* ⭐ الحل: افتح المشغل تلقائياً من الجهاز */
-        showOpeningOverlay();
-        
-        // انتظر نصف ثانية وبعدين افتح القائمة
+        /* ⭐ افتح MX Player تلقائياً بعد نصف ثانية */
         setTimeout(function(){
-            triggerAndroidChooser();
-            
-            // لو لسه على الصفحة بعد 2.5 ثانية → اعرض النافذة الاحتياطية
-            setTimeout(function(){
-                if(document.visibilityState === "visible"){
-                    showPlayerModal();
-                }
-            }, 2500);
-        }, 300);
+            window.launchMXPlayer();
+        }, 500);
+        
+        /* ⭐ اظهر النافذة الاحتياطية كخيار تاني */
+        setTimeout(function(){
+            if(document.visibilityState === "visible"){
+                showPlayerModal(data.url);
+            }
+        }, 2500);
         
         watchChannel(code);
         
@@ -599,7 +526,6 @@ function watchChannel(code){
     activeListener = onValue(ref(db, "channels/" + code), snapshot=>{
         if(!snapshot.exists()){ 
             closePlayerModal();
-            closeOpeningOverlay();
             setMsg("تم حذف القناة من الأدمن", "err");
             removeFromHistory(code); 
             return; 
@@ -607,7 +533,6 @@ function watchChannel(code){
         const data = snapshot.val();
         if(data.active !== true){ 
             closePlayerModal();
-            closeOpeningOverlay();
             setMsg("تم إيقاف القناة من الأدمن", "err");
             removeFromHistory(code); 
             return; 
@@ -723,4 +648,4 @@ document.addEventListener("visibilitychange", ()=>{ if(!document.hidden){ cleanH
 
 </script>
 </body>
-</html>
+   </html>
